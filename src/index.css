@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  background-color: #121212;
+  color: #fff; /* Optional: makes text readable on dark bg */
+}
