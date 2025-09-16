@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 // Replace with your actual image or use a placeholder
 const cardImage = "https://images.pexels.com/photos/244206/pexels-photo-244206.jpeg";
 
-const demoCards = Array.from({ length: 10 }).map((_, i) => ({
+// 44 demo cards (18 + 26)
+const demoCards = Array.from({ length: 44 }).map((_, i) => ({
   id: i + 1,
   title: `F1 WHEEL SPIN TO SURVIVE WIN UP2 40K INSTANTLY #${i + 1}`,
   price: '£2.50 per entry',
@@ -12,8 +13,11 @@ const demoCards = Array.from({ length: 10 }).map((_, i) => ({
   image: cardImage,
 }));
 
+const CARDS_PER_PAGE = 12;
+
 function CompetitionCards() {
   const [activeFilter, setActiveFilter] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filterButtons = [
     { id: 'ALL', label: 'ALL' },
@@ -21,6 +25,12 @@ function CompetitionCards() {
     { id: 'PRIZE', label: 'PRIZE' },
     { id: 'SCRATCH_CARDS', label: 'SCRATCH CARDS' }
   ];
+
+  // Pagination logic
+  const totalPages = Math.ceil(demoCards.length / CARDS_PER_PAGE);
+  const startIdx = (currentPage - 1) * CARDS_PER_PAGE;
+  const endIdx = startIdx + CARDS_PER_PAGE;
+  const cardsToShow = demoCards.slice(startIdx, endIdx);
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
@@ -73,9 +83,9 @@ function CompetitionCards() {
         </div>
 
         {/* Competition Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-          {demoCards.map((card) => (
-            <div key={card.id} className="bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-yellow-500 flex flex-col">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 px-2 sm:px-0">
+          {cardsToShow.map((card) => (
+            <div key={card.id} className="rounded-xl overflow-hidden shadow-lg border border-yellow-500 flex flex-col w-full max-w-full mx-auto">
               {/* Card Image Section */}
               <div className="relative w-full h-48">
                 <img 
@@ -85,9 +95,9 @@ function CompetitionCards() {
                 />
               </div>
               {/* Card Content Section */}
-              <div className="p-4 bg-gray-900 text-white flex flex-col flex-1">
+              <div className="p-4 text-white flex flex-col flex-1">
                 {/* Progress Bar with Text */}
-                <div className="relative w-full h-7 bg-gray-700 rounded-full mb-4">
+                <div className="relative w-full bg-slate-300 h-7 rounded-full mb-4">
                   <div 
                     className="absolute inset-0 rounded-full transition-all duration-500 ease-in-out"
                     style={{
@@ -127,19 +137,46 @@ function CompetitionCards() {
           ))}
         </div>
 
-        {/* Load More Button */}
-        <div className="text-center mt-12">
-          <button 
-            className="px-8 py-3 font-bold text-sm tracking-wider rounded-full hover:opacity-90 transition-opacity"
-            style={{
-              background: 'linear-gradient(90deg, #E28B27 0%, #F5D334 29.19%, #F6D63E 32.42%, #F5D334 67.48%, #ECC92F 72.69%, #D5AC22 81.69%, #AE7F0D 93.33%, #966200 100%)',
-              color: '#fff',
-              border: 'none'
-            }}
-          >
-            VIEW MORE COMPETITIONS
-          </button>
-        </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-12 flex-wrap">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-full font-bold ${
+                currentPage === 1
+                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-yellow-500 text-black hover:bg-yellow-600'
+              }`}
+            >
+              Prev
+            </button>
+            {[...Array(totalPages)].map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentPage(idx + 1)}
+                className={`px-3 py-1 rounded-full font-bold ${
+                  currentPage === idx + 1
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-black'
+                    : 'bg-gray-800 text-yellow-400 hover:bg-yellow-900/10'
+                }`}
+              >
+                {idx + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-full font-bold ${
+                currentPage === totalPages
+                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-yellow-500 text-black hover:bg-yellow-600'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
