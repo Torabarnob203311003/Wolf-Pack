@@ -1,3 +1,4 @@
+import CompetitionCards from "./Components/CompetitionCards/CompetitionCards"
 import FacebookBanner from "./Components/Facebookbanner/Facebookbanner"
 import Hero from "./Components/Hero/Hero"
 import Navbar from "./Components/Navbar/Navbar"
@@ -9,6 +10,7 @@ function App() {
      <Navbar  />
      <Hero />
      <FacebookBanner/>
+     <CompetitionCards />
     </>
   )
 }
