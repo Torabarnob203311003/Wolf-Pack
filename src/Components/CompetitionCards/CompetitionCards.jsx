@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
 // Replace with your actual image or use a placeholder
 const cardImage = "https://images.pexels.com/photos/244206/pexels-photo-244206.jpeg";
@@ -18,6 +19,7 @@ const CARDS_PER_PAGE = 12;
 function CompetitionCards() {
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
 
   const filterButtons = [
     { id: 'ALL', label: 'ALL' },
@@ -85,7 +87,11 @@ function CompetitionCards() {
         {/* Competition Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 px-2 sm:px-0">
           {cardsToShow.map((card) => (
-            <div key={card.id} className="rounded-xl overflow-hidden shadow-lg border border-yellow-500 flex flex-col w-full max-w-full mx-auto">
+            <div
+              key={card.id}
+              className="rounded-xl overflow-hidden shadow-lg border border-yellow-500 flex flex-col w-full max-w-full mx-auto cursor-pointer"
+              onClick={() => navigate(`/card/${card.id}`)}
+            >
               {/* Card Image Section */}
               <div className="relative w-full h-48">
                 <img 
