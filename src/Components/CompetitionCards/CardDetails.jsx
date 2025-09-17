@@ -29,7 +29,7 @@ const CardDetails = () => {
           </div>
 
           {/* Right Section: Details and Price */}
-          <div className="bg-gray-800 p-6 sm:p-8 lg:p-10 text-white relative flex flex-col justify-between lg:rounded-r-xl rounded-b-xl lg:rounded-bl-none">
+          <div className="p-6 sm:p-8 lg:p-10 text-white relative flex flex-col justify-between lg:rounded-r-xl rounded-b-xl lg:rounded-bl-none">
             {/* Scroll Indicator (Stylized Scrollbar) */}
             <div className="absolute right-2 top-0 bottom-0 w-2 bg-gray-700 rounded-full my-4 hidden lg:block">
                 {/* <div 
@@ -42,7 +42,12 @@ const CardDetails = () => {
               <h2 className="text-3xl font-bold mb-2">BM3 M3</h2>
               <p className="text-sm text-gray-400 mb-4">£0 per entry</p> {/* Assuming 0 per entry for 'BUY LUCKY DIP' */}
 
-              <button className="bg-yellow-500 hover:bg-orange-600 text-black font-bold py-2 px-6 rounded-lg text-sm uppercase transition-all duration-300 mb-6 tracking-wide">
+              <button 
+                className="text-black font-bold py-2 px-6 rounded-lg text-sm uppercase transition-all duration-300 mb-6 tracking-wide hover:opacity-90"
+                style={{
+                  background: 'linear-gradient(90deg, #E28B27 0%, #F5D334 29.19%, #F6D63E 32.42%, #F5D334 67.48%, #ECC92F 72.69%, #D5AC22 81.69%, #AE7F0D 93.33%, #966200 100%)'
+                }}
+              >
                 BUY LUCKY DIP
               </button>
 
@@ -72,11 +77,14 @@ const CardDetails = () => {
         </div>
 
         {/* Bottom Section: Progress Bar and Ticket Info */}
-        <div className="p-6 bg-gray-900 text-white text-center border-t border-gray-700">
-          <div className="relative w-full h-8 bg-gray-700 rounded-full mb-4 flex items-center justify-center">
+        <div className="p-6  text-white text-center border-t border-gray-700">
+          <div className="relative w-full h-8 bg-zinc-300 rounded-full mb-4 flex items-center justify-center">
             <div 
-              className="absolute left-0 h-full bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full transition-all duration-500 ease-in-out" 
-              style={{ width: `${progressPercentage}%` }}
+              className="absolute left-0 h-full rounded-full transition-all duration-500 ease-in-out" 
+              style={{ 
+                width: `${progressPercentage}%`,
+                background: 'linear-gradient(90deg, #FFFFFF 0%, #E28B27 100%)'
+              }}
             ></div>
             <span className="relative z-10 text-sm font-bold text-black drop-shadow-sm">
               {`${Math.round(progressPercentage)}%`}
@@ -107,7 +115,6 @@ const CardDetails = () => {
 
           <About/>
          
-   
 
   </div>
     

@@ -4,10 +4,12 @@ import CompetitionCards from "./Components/CompetitionCards/CompetitionCards";
 import CardDetails from "./Components/CompetitionCards/CardDetails";
 import PastWinners from "./Components/PastWinners/PastWinners";
 import About from "./Components/Common/About";
+import ScrollToTop from "./Components/ScrollToTop";
 
 function App() {
   return (
     <Router>
+      <ScrollToTop/>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={
