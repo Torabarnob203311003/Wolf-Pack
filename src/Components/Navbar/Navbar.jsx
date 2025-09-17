@@ -31,13 +31,13 @@ function Navbar() {
         <nav className="hidden lg:flex xl:flex-1 xl:justify-center">
           <ul className="flex space-x-6 xl:space-x-8">
             <li>
-              <a 
+              <Link to="/" 
                 href="#" 
                 className="text-sm font-bold tracking-widest uppercase leading-tight hover:opacity-80 transition-opacity"
                 style={{color: '#C39836', fontFamily: 'Kumbh Sans', letterSpacing: '0.65px', lineHeight: '19.5px'}}
               >
                 OUR COMPETITIONS
-              </a>
+              </Link>
             </li>
             <li>
               <Link 
@@ -49,13 +49,13 @@ function Navbar() {
               </Link>
             </li>
             <li>
-              <a 
-                href="#" 
+              <Link 
+                to="/" 
                 className="text-sm font-bold tracking-widest uppercase leading-tight hover:opacity-80 transition-opacity"
                 style={{color: '#C39836', fontFamily: 'Kumbh Sans', letterSpacing: '0.65px', lineHeight: '19.5px'}}
               >
-                JACKPOTS
-              </a>
+                About US
+              </Link>
             </li>
           </ul>
         </nav>

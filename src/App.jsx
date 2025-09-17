@@ -5,6 +5,9 @@ import CardDetails from "./Components/CompetitionCards/CardDetails";
 import PastWinners from "./Components/PastWinners/PastWinners";
 import About from "./Components/Common/About";
 import ScrollToTop from "./Components/ScrollToTop";
+import Navbar from "./Components/Navbar/Navbar";
+import FacebookBanner from "./Components/Facebookbanner/Facebookbanner";
+import Footer from "./Components/Common/Footer";
 
 function App() {
   return (
@@ -14,6 +17,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={
             <>
+            
               <CompetitionCards />
               <About />
             </>
@@ -25,14 +29,25 @@ function App() {
         
             </>
           } />
-          <Route path="past-winners" element={
-            
-            
-            <PastWinners /> } />
+      
           
-          <Route path="about" element={<About />} />
+         
           
         </Route>
+
+        <Route path="/past-winners" element={
+          
+          <>
+          <Navbar />
+          <PastWinners />
+          <FacebookBanner />
+          <About />
+          <Footer />
+          
+          
+          </>
+          
+          } />
       </Routes>
     </Router>
   );
