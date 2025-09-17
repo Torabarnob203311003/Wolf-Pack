@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,13 +40,13 @@ function Navbar() {
               </a>
             </li>
             <li>
-              <a 
-                href="#" 
+              <Link 
+                  to="/past-winners"
                 className="text-sm font-bold tracking-widest uppercase leading-tight hover:opacity-80 transition-opacity"
                 style={{color: '#C39836', fontFamily: 'Kumbh Sans', letterSpacing: '0.65px', lineHeight: '19.5px'}}
               >
                 PAST WINNERS
-              </a>
+              </Link>
             </li>
             <li>
               <a 
@@ -120,14 +121,14 @@ function Navbar() {
             >
               OUR COMPETITIONS
             </a>
-            <a 
-              href="#" 
+            <Link 
+              to="/past-winners"
               className="block text-sm font-bold tracking-widest uppercase leading-tight py-2 hover:opacity-80 transition-opacity"
               style={{color: '#C39836', fontFamily: 'Kumbh Sans', letterSpacing: '0.65px', lineHeight: '19.5px'}}
               onClick={() => setIsMenuOpen(false)}
             >
               PAST WINNERS
-            </a>
+            </Link>
             <a 
               href="#" 
               className="block text-sm font-bold tracking-widest uppercase leading-tight py-2 hover:opacity-80 transition-opacity"

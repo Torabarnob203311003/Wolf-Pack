@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
+    "framer-motion": "^12.23.14",
+    "gsap": "^3.13.0",
     "icons": "^1.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

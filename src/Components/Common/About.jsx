@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 // Star rating component to render the stars
 const StarRating = ({ rating }) => {
@@ -12,13 +13,19 @@ const StarRating = ({ rating }) => {
   if (rating % 1 !== 0) {
     stars += halfStar;
   }
-
   return <span className="text-yellow-400">{stars}</span>;
 };
 
 // Testimonial Card Component
 const TestimonialCard = ({ review, rating, verified }) => (
-  <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl flex flex-col justify-between h-full">
+  <motion.div
+    className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl border border-gray-700 shadow-xl flex flex-col justify-between h-full"
+    // Animation properties for blur-to-clear effect
+    initial={{ opacity: 0, x: -50, filter: 'blur(10px)' }}
+    whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+    viewport={{ once: true, amount: 0.3 }}
+    transition={{ duration: 0.8, ease: "easeOut" }} // Increased duration for a smoother transition
+  >
     <p className="text-gray-300 text-sm italic">"{review}"</p>
     <div className="mt-4 flex items-center justify-between">
       <StarRating rating={rating} />
@@ -31,73 +38,40 @@ const TestimonialCard = ({ review, rating, verified }) => (
         </div>
       )}
     </div>
-  </div>
+  </motion.div>
 );
 
 // Main About component
 const About = () => {
-  // Move the testimonials data inside the component
   const testimonials = [
-    {
-      id: 1,
-      review: "Exciting real chance of winning, fun and trustworthy too. Local company people you know and can relate to, local winners showing how real it is, normal people",
-      rating: 5,
-      verified: true,
-    },
-    {
-      id: 2,
-      review: "Wolf Competitions is a fabulous site that helps each other and the community. We're paid out to your account in seconds. They also do an awful lot for charity, which I also love. Keep your Eyes On The Prize",
-      rating: 4.5,
-      verified: true,
-    },
-    {
-      id: 3,
-      review: "Mint people do life changing things for people who can only dream of winning money and do for special places like food bank, sponsor and much more",
-      rating: 5,
-      verified: true,
-    },
-    {
-      id: 4,
-      review: "They are a fabulous group so generous to charities. They are like one huge family. Even though I don't win very much every win is treated the same they pay out immediately with grace. I absolutely love them and love watching the videos on Facebook.",
-      rating: 5,
-      verified: true,
-    },
-    {
-      id: 5,
-      review: "great competitions and helping the community out, and I always recommend wolf competitions over other ppl who've been on other sites and they don't do all they do.",
-      rating: 5,
-      verified: true,
-    },
-    {
-      id: 6,
-      review: "Wolf Competitions are so easy to use, any wins payed into your bank within hours, usually minutes, lots of fun opportunities to win prizes",
-      rating: 5,
-      verified: true,
-    },
-    {
-      id: 7,
-      review: "Mint people do life changing things for people who can only dream of winning money and do for special places like food bank, sponsor and much more",
-      rating: 5,
-      verified: true,
-    },
-    {
-      id: 8,
-      review: "Love playing wolf competitions... It's Class. Love playing wolf competitions... It's Class",
-      rating: 4.5,
-      verified: true,
-    },
+    { id: 1, review: "Exciting real chance of winning, fun and trustworthy too. Local company people you know and can relate to, local winners showing how real it is, normal people", rating: 5, verified: true },
+    { id: 2, review: "Wolf Competitions is a fabulous site that helps each other and the community. We're paid out to your account in seconds. They also do an awful lot for charity, which I also love. Keep your Eyes On The Prize", rating: 4.5, verified: true },
+    { id: 3, review: "Mint people do life changing things for people who can only dream of winning money and do for special places like food bank, sponsor and much more", rating: 5, verified: true },
+    { id: 4, review: "They are a fabulous group so generous to charities. They are like one huge family. Even though I don't win very much every win is treated the same they pay out immediately with grace. I absolutely love them and love watching the videos on Facebook.", rating: 5, verified: true },
+    { id: 5, review: "great competitions and helping the community out, and I always recommend wolf competitions over other ppl who've been on other sites and they don't do all they do.", rating: 5, verified: true },
+    { id: 6, review: "Wolf Competitions are so easy to use, any wins payed into your bank within hours, usually minutes, lots of fun opportunities to win prizes", rating: 5, verified: true },
+    { id: 7, review: "Mint people do life changing things for people who can only dream of winning money and do for special places like food bank, sponsor and much more", rating: 5, verified: true },
+    { id: 8, review: "Love playing wolf competitions... It's Class. Love playing wolf competitions... It's Class", rating: 4.5, verified: true },
   ];
 
   return (
-    <div className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+    <div className="text-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
           What people say about us
         </h2>
       </div>
-      
-      {/* Testimonial Grid */}
-      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto custom-scrollbar-hidden">
+
+      <motion.div
+        className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto custom-scrollbar-hidden"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={{
+          visible: { transition: { staggerChildren: 0.1 } },
+          hidden: {},
+        }}
+      >
         {testimonials.map((testimonial) => (
           <TestimonialCard 
             key={testimonial.id}
@@ -106,12 +80,8 @@ const About = () => {
             verified={testimonial.verified}
           />
         ))}
-        {/* Optional placeholders for layout balance */}
-        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl flex flex-col justify-between h-full min-w-[250px] sm:min-w-0"></div>
-        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl flex flex-col justify-between h-full min-w-[250px] sm:min-w-0"></div>
-      </div>
+      </motion.div>
       
-      {/* Trustpilot Section */}
       <div className="mt-12 text-center text-gray-400">
         <p className="text-sm">
           Rated 4.7 / 5 based on 2,006 Reviews. Showing our 4 & 5 star reviews.

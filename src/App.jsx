@@ -25,7 +25,10 @@ function App() {
         
             </>
           } />
-          <Route path="past-winners" element={<PastWinners />} />
+          <Route path="past-winners" element={
+            
+            
+            <PastWinners /> } />
           
           <Route path="about" element={<About />} />
           
