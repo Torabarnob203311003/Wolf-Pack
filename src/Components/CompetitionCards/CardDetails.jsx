@@ -1,27 +1,117 @@
 import React from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import FacebookBanner from '../Facebookbanner/Facebookbanner';
+import About from '../Common/About';
+import Footer from '../Common/Footer';
 
-const cardImage = "https://images.pexels.com/photos/244206/pexels-photo-244206.jpeg";
+const CardDetails = () => {
+  const ticketsSold = 12499;
+  const totalTickets = 45815;
+  const ticketsAvailable = totalTickets - ticketsSold;
+  const progressPercentage = (ticketsSold / totalTickets) * 100;
 
-function CardDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-
-  // For demo, just show the ID and a back button
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-gray-900 text-white rounded-xl mt-8">
-      <button
-        className="mb-4 px-4 py-2 bg-yellow-500 text-black rounded"
-        onClick={() => navigate(-1)}
-      >
-        Back
-      </button>
-      <h2 className="text-2xl font-bold mb-4">Card Details for Card #{id}</h2>
-      <img src={cardImage} alt="Card" className="w-full rounded mb-4" />
-      {/* Add more details as needed */}
-      <p>More details about card #{id} go here.</p>
+  <div>
+
+
+
+  <div className="flex justify-center items-center min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="bg-gray-800 rounded-xl overflow-hidden shadow-2xl max-w-6xl w-full border border-gray-700">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 relative">
+          
+          {/* Left Section: Car Image */}
+          <div className="relative">
+            <img 
+              src="https://images.pexels.com/photos/244206/pexels-photo-244206.jpeg" 
+              alt="Yellow BMW M3" 
+              className="w-full h-full object-cover lg:rounded-l-xl rounded-t-xl lg:rounded-tr-none" 
+              style={{ minHeight: '300px', maxHeight: '500px' }} // Adjust height as needed
+            />
+          </div>
+
+          {/* Right Section: Details and Price */}
+          <div className="bg-gray-800 p-6 sm:p-8 lg:p-10 text-white relative flex flex-col justify-between lg:rounded-r-xl rounded-b-xl lg:rounded-bl-none">
+            {/* Scroll Indicator (Stylized Scrollbar) */}
+            <div className="absolute right-2 top-0 bottom-0 w-2 bg-gray-700 rounded-full my-4 hidden lg:block">
+                {/* <div 
+                    className="absolute left-0 w-full bg-gradient-to-b from-yellow-500 to-orange-600 rounded-full" 
+                    style={{ height: '30%', top: '10%' }} // Adjust height and top for scroll position
+                ></div> */}
+            </div>
+
+            <div className="flex-grow pr-4 lg:pr-6 custom-scrollbar" style={{ maxHeight: '450px', overflowY: 'auto' }}> {/* Added for scrollability on content */}
+              <h2 className="text-3xl font-bold mb-2">BM3 M3</h2>
+              <p className="text-sm text-gray-400 mb-4">£0 per entry</p> {/* Assuming 0 per entry for 'BUY LUCKY DIP' */}
+
+              <button className="bg-yellow-500 hover:bg-orange-600 text-black font-bold py-2 px-6 rounded-lg text-sm uppercase transition-all duration-300 mb-6 tracking-wide">
+                BUY LUCKY DIP
+              </button>
+
+              <p className="text-lg font-semibold mb-2">2015 BMW M3 - 74k Miles</p>
+              <p className="text-gray-300 mb-4">Over 30K Spent On This Car Alone</p>
+
+              {/* Comfort Pack & Technology Pack */}
+              <p className="text-md font-semibold text-yellow-500 mb-2">Comfort Pack & Technology Pack</p>
+              <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1 mb-6">
+                <li>Electric Memory Seats</li>
+                <li>Heads-Up Display</li>
+                <li>Harman Kardon Sound System</li>
+                <li>Rear Camera</li>
+                <li>Bootmod3 Stage 1 Tune – Dyno Proven 533.3bhp (Mallory Park. Nov 2024)</li>
+                <li>Full Service History</li>
+              </ul>
+
+              {/* Exterior */}
+              <p className="text-md font-semibold text-yellow-500 mb-2">Exterior</p>
+              <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1 mb-6">
+                <li>Wrapped in Speed Yellow (original Mineral White) – door shuts. inside doors & boot professionally finished</li>
+                <li>Genuine CS Rear Lights</li>
+                <li>Genuine Icon V.2 Adaptive Headlights</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section: Progress Bar and Ticket Info */}
+        <div className="p-6 bg-gray-900 text-white text-center border-t border-gray-700">
+          <div className="relative w-full h-8 bg-gray-700 rounded-full mb-4 flex items-center justify-center">
+            <div 
+              className="absolute left-0 h-full bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full transition-all duration-500 ease-in-out" 
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+            <span className="relative z-10 text-sm font-bold text-black drop-shadow-sm">
+              {`${Math.round(progressPercentage)}%`}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center text-sm font-semibold mt-4 px-2">
+            <div className="text-left">
+              <span className="text-yellow-500 text-lg sm:text-xl font-bold">{ticketsSold.toLocaleString()}</span>
+              <p className="text-gray-400">Tickets sold</p>
+            </div>
+            <div className="text-right">
+              <span className="text-yellow-500 text-lg sm:text-xl font-bold">{ticketsAvailable.toLocaleString()}</span>
+              <p className="text-gray-400">Ticket available</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+   
+
+    
     </div>
+
+                          
+
+          <FacebookBanner/>
+
+          <About/>
+         
+   
+
+  </div>
+    
   );
-}
+};
 
 export default CardDetails;

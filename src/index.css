@@ -6,3 +6,15 @@ body {
   background-color: #121212;
   color: #fff; /* Optional: makes text readable on dark bg */
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #F59E42 0%, #E28B27 100%);
+  border-radius: 8px;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #F59E42 #2d3748; /* thumb color, track color */
+}
