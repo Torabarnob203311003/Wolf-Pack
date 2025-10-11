@@ -12,12 +12,11 @@ import Footer from "./Components/Common/Footer";
 function App() {
   return (
     <Router>
-      <ScrollToTop/>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={
             <>
-            
               <CompetitionCards />
               <About />
             </>
@@ -25,29 +24,27 @@ function App() {
           <Route path="card/:id" element={
             <>
               <CardDetails />
-              
-        
             </>
           } />
-      
-          
-         
-          
+
+
+
+
         </Route>
 
         <Route path="/past-winners" element={
-          
+
           <>
-          <Navbar />
-          <PastWinners />
-          <FacebookBanner />
-          <About />
-          <Footer />
-          
-          
+            <Navbar />
+            <PastWinners />
+            <FacebookBanner />
+            <About />
+            <Footer />
+
+
           </>
-          
-          } />
+
+        } />
       </Routes>
     </Router>
   );
