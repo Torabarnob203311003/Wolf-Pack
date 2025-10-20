@@ -58,7 +58,6 @@ const CardDetails = () => {
   const ticketsSold = raffle.ticketSold;
   const totalTickets = raffle.totalTicket;
   const ticketsAvailable = totalTickets - ticketsSold;
-  // const progressPercentage = (ticketsSold / totalTickets) * 100;
 
   return (
     <div>
@@ -156,7 +155,11 @@ const CardDetails = () => {
       </div>
       <FacebookBanner />
 
-      <TicketPurchaseSection />
+      <TicketPurchaseSection
+        ticketPrice={raffle.price}
+        maxTickets={raffle.perUserTicketLimit}
+        raffle={raffle}
+      />
 
       <About />
 
