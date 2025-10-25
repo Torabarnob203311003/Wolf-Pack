@@ -8,6 +8,8 @@ import ScrollToTop from "./Components/ScrollToTop";
 import Navbar from "./Components/Navbar/Navbar";
 import FacebookBanner from "./Components/Facebookbanner/Facebookbanner";
 import Footer from "./Components/Common/Footer";
+import SignIn from "./Pages/SignIn/SignIn";
+import SignUp from "./Pages/SignUp/SignUp";
 
 function App() {
   return (
@@ -26,25 +28,20 @@ function App() {
               <CardDetails />
             </>
           } />
-
-
-
-
         </Route>
 
         <Route path="/past-winners" element={
-
           <>
             <Navbar />
             <PastWinners />
             <FacebookBanner />
             <About />
             <Footer />
-
-
           </>
 
         } />
+        <Route path="/sign-in" element={<SignIn/>} />
+        <Route path="/sign-up" element={<SignUp/>} />
       </Routes>
     </Router>
   );

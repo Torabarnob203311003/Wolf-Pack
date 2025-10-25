@@ -42,6 +42,9 @@ const CardDetails = () => {
     );
   }
 
+  const progressPercentage = (raffle.ticketSold / raffle.totalTicket) * 100;
+
+
   if (error || !raffle) {
     return (
       <div>
@@ -124,25 +127,25 @@ const CardDetails = () => {
 
           {/* Bottom Section: Progress Bar and Ticket Info */}
           <div className="p-6  text-white text-center border-t border-gray-700">
-            <div className="relative w-full h-8 bg-zinc-300 rounded-full mb-4 flex items-center justify-center">
+           <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="absolute left-0 h-full rounded-full transition-all duration-500 ease-in-out"
                 style={{
-                  // width: `${progressPercentage}%`,
-                  width: `70%`,
+                  width: `${progressPercentage}%`,
                   background: 'linear-gradient(90deg, #FFFFFF 0%, #E28B27 100%)'
                 }}
               ></div>
-              <span className="relative z-10 text-sm font-bold text-black drop-shadow-sm">
-                {/* {`${Math.round(progressPercentage)}%`} */}
-                {`70%`}
+
+              {/* Show percentage text */}
+              <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-black">
+                {progressPercentage.toFixed(1)}%
               </span>
             </div>
 
             <div className="flex justify-between items-center text-sm font-semibold mt-4 px-2">
               <div className="text-left">
                 {/* <span className="text-yellow-500 text-lg sm:text-xl font-bold">{ticketsSold.toLocaleString()}</span> */}
-                <span className="text-yellow-500 text-lg sm:text-xl font-bold">7,000</span>
+                <span className="text-yellow-500 text-lg sm:text-xl font-bold">{raffle.ticketSold}</span>
                 <p className="text-gray-400">Tickets sold</p>
               </div>
               <div className="text-right">

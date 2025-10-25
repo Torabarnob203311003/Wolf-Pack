@@ -1,13 +1,17 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, Router, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate();
+  
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
+ 
   return (
     <header className="px-4 md:px-6 py-3 md:py-4">
       <div className="container flex justify-between items-center mx-auto max-w-7xl">
@@ -62,7 +66,7 @@ function Navbar() {
 
         {/* Auth Buttons - Hidden on Mobile */}
         <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
-          <button
+          {user && isAuthenticated ? (<button
             className="px-4 lg:px-6 py-1.5 lg:py-2 text-xs lg:text-sm font-medium rounded-full hover:bg-opacity-10 hover:bg-white transition-all relative"
             style={{
               color: '#C39836',
@@ -71,18 +75,37 @@ function Navbar() {
             }}
           >
             <span
+              onClick={logout}
               className="block w-full h-full px-4 lg:px-8 py-1.5 lg:py-2 bg-gray-900  rounded-full"
               style={{ color: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)' }}
             >
-              Login
+              Sign Out
+            </span>
+          </button>): (<>
+            <button
+            className="px-4 lg:px-6 py-1.5 lg:py-2 text-xs lg:text-sm font-medium rounded-full hover:bg-opacity-10 hover:bg-white transition-all relative"
+            style={{
+              color: '#C39836',
+              background: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)',
+              padding: '2px',
+            }}
+          >
+            <span
+              onClick={() => navigate('/sign-in')}
+              className="block w-full h-full px-4 lg:px-8 py-1.5 lg:py-2 bg-gray-900  rounded-full"
+              style={{ color: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)' }}
+            >
+              Sign In
             </span>
           </button>
           <button
+            onClick={()=> navigate('/sign-up')}
             className="px-4 lg:px-8 py-1.5 lg:py-2 text-xs lg:text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity"
             style={{ background: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)' }}
           >
             Sign Up
           </button>
+          </>)}
         </div>
 
         {/* Mobile Menu Button */}
@@ -141,6 +164,7 @@ function Navbar() {
 
           {/* Mobile Auth Buttons */}
           <div className="flex flex-col space-y-3 pt-4 border-t border-gray-800">
+            {user && isAuthenticated ? (<>
             <button
               className="w-full text-sm font-medium rounded-full hover:bg-opacity-10 hover:bg-white transition-all relative"
               style={{
@@ -149,18 +173,39 @@ function Navbar() {
               }}
             >
               <span
+               onClick={logout}
                 className="block w-full h-full px-8 py-2.5 bg-gray-900 rounded-full"
                 style={{ color: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)' }}
               >
-                Login
+                Sign Out
+              </span>
+            </button>
+            </>):(<>
+              <button
+              className="w-full text-sm font-medium rounded-full hover:bg-opacity-10 hover:bg-white transition-all relative"
+              style={{
+                background: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)',
+                padding: '2px',
+              }}
+            >
+              <span
+                onClick={()=> navigate('/sign-in')}
+                className="block w-full h-full px-8 py-2.5 bg-gray-900 rounded-full"
+                style={{ color: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)' }}
+              >
+                Sign in
               </span>
             </button>
             <button
+              onClick={()=> navigate('/sign-up')}
               className="w-full px-8 py-2.5 text-sm font-medium text-white rounded-full hover:opacity-90 transition-opacity"
               style={{ background: 'linear-gradient(90deg, #C78800 0%, #F5D334 17.79%, #EDC933 27.88%, #D9AD30 45.29%, #D4A52F 49.38%, #F0CC33 70.61%, #F5D334 74.22%, #ECC92F 78.35%, #D5AC22 85.48%, #AE7F0D 94.71%, #966200 100%)' }}
             >
               Sign Up
             </button>
+            </>)}
+            
+            
           </div>
         </div>
       </div>
