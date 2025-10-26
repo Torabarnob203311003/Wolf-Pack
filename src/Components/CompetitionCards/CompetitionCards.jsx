@@ -23,15 +23,15 @@ function CompetitionCards() {
   ];
 
   const segments = [
-  { option: '$0' },
-  { option: '$1' },
-  { option: '$2' },
-  { option: '$5' },
-  { option: '$25' },
-  { option: '$50' },
-  { option: '👑 JACKPOT' },
-  { option: '🔴 ZERO' },
-];
+    { option: '$5' },
+    { option: '$0' },
+    { option: '$50' },
+    { option: '$2' },
+    { option: '$25' },
+    { option: '$1' },
+    { option: '👑 JACKPOT' },
+    { option: '🔴 ZERO' },
+  ];
 
 
 const handleSpinClick = (customIndex) => {
@@ -122,12 +122,6 @@ const handleSpinClick = (customIndex) => {
     );
   }
 
-  //  const handleSpinClick = () => {
-  //   const newPrizeNumber = Math.floor(Math.random() * segments.length);
-  //   setPrizeNumber(newPrizeNumber);
-  //   setMustSpin(true);
-  // };
-
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -177,13 +171,6 @@ const handleSpinClick = (customIndex) => {
           </div>
         </div>
 
-        {/* Active Filter Indicator */}
-        <div className="text-center mb-6">
-          <p className="text-yellow-400 text-sm">
-            {/* Showing {filteredCards.length} {activeFilter === 'ALL' ? 'competitions' : activeFilter.toUpperCase() + ' competitions'} */}
-          </p>
-        </div>
-
         {/* Competition Cards Grid */}
         {cardsToShow.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-6  min-h-screen text-white">
@@ -192,17 +179,17 @@ const handleSpinClick = (customIndex) => {
               mustStartSpinning={mustSpin}
               prizeNumber={prizeNumber}
               data={segments}
-              outerBorderColor={['#FFD700']} // gold border
+              outerBorderColor={['#FFD700']}
               outerBorderWidth={6}
-              innerBorderColor={['#1a1a1d']} // dark inner ring
+              innerBorderColor={['#1a1a1d']}
               innerBorderWidth={6}
               radiusLineColor={['#222']}
               radiusLineWidth={2}
               backgroundColors={[
-                '#00C4CC', // teal
-                '#F9A602', // gold/orange
-                '#F94144', // red
-                '#6A5ACD', // blue/purple
+                '#00C4CC', 
+                '#F9A602',
+                '#F94144',
+                '#6A5ACD',
               ]}
               textColors={['#fff']}
               fontSize={16}
@@ -215,21 +202,6 @@ const handleSpinClick = (customIndex) => {
             </div>
           </div>
 
-      {/* <div className="w-[80%] max-w-sm bg-[#141417] rounded-full h-4 overflow-hidden">
-        <div
-          className="bg-gradient-to-r from-[#FFD700] to-[#ffb400] h-full text-xs text-black text-right pr-2"
-          style={{ width: `${(6870 / 9999) * 100}%` }}
-        >
-          6870/9999
-        </div>
-      </div> */}
-
-      {/* <p className="font-semibold tracking-wider text-[#FFD700] text-sm">
-        WOLF 50/50 – 10K EDITION 50%
-      </p> */}
-
-
-
       <button
         onClick={handleSpinClick}
         className="px-8 py-3 rounded-md bg-gradient-to-b from-[#FFD700] to-[#b8860b] text-black font-bold tracking-wide hover:scale-105 transition-transform duration-200 shadow-[0_0_20px_rgba(255,215,0,0.4)]"
@@ -238,7 +210,7 @@ const handleSpinClick = (customIndex) => {
       </button>
       
       <button onClick={() => handleSpinClick(7)}>Spin Jackpot</button> 
-      <button onClick={() => handleSpinClick(3)}>Spin $2</button>    
+      <button onClick={() => handleSpinClick(4)}>Spin $2</button>    
 
     </div>
         ) : (

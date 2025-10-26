@@ -115,11 +115,6 @@ const TicketPurchaseSection = ({ ticketPrice = 30, maxTickets = 50, raffle }) =>
     return (
         <div className="w-full bg-[#121212] py-8 px-4">
             <div className="max-w-6xl mx-auto">
-                {/* Title */}
-                <h3 className="text-white text-center text-lg sm:text-xl font-semibold mb-8">
-                    Choose how many spins you would like to purchase:
-                </h3>
-
                 {/* Status Messages */}
                 {isRaffleClosed && (
                     <div className="text-center mb-4">
