@@ -2,6 +2,8 @@ import  { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import axiosSecure from '../../lib/axiosSecure';
 import { Wheel } from 'react-custom-roulette';
+import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const CARDS_PER_PAGE = 12;
 
@@ -13,7 +15,7 @@ function CompetitionCards() {
   const [error, setError] = useState(null);
   const [segments, setSegments] = useState([]);
   const navigate = useNavigate();
-
+  const { user } = useAuth();
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
 
@@ -23,24 +25,17 @@ function CompetitionCards() {
     { id: 'prize', label: 'PRIZE' },
   ];
 
-  // const handleSpinClick = (customIndex) => {
-  //   let newPrizeNumber;
-
-  //   if (typeof customIndex === "number") {
-  //     newPrizeNumber = customIndex; 
-  //   } 
-   
-  //   else {
-  //     newPrizeNumber = Math.floor(Math.random() * segments.length);
-  //   }
-
-  //   setPrizeNumber(newPrizeNumber);
-  //   setMustSpin(true);
-  // };
-
   const handleSpinClick = async () => {
     try {
-      const res = await axiosSecure.get('/spinner/start-spin');
+
+      if(!user){
+        toast.error('Please login to spin the wheel.');
+        return;
+      }
+    
+      const res = await axiosSecure.post('/spinner/start-spin', {
+        userId: user._id,
+      });
       const apiData = res.data;
 
       if (!apiData?.success || !apiData.data?.prize) {
@@ -69,17 +64,12 @@ function CompetitionCards() {
     }
   };
 
-
-
-
   const fetchSpinner = async () => {
     try {
       const res = await axiosSecure.get('/spinner/get-spinner');
-      // console.log('🌀 Spinner API Response:', res.data.data[0].prizes);
 
-      // assuming API returns something like: { success: true, data: [ {...}, {...} ] }
       if (res.data?.success && Array.isArray(res.data.data)) {
-        const spinner = res.data.data[0].prizes; // get [0] index
+        const spinner = res.data.data[0].prizes;
         // console.log(spinner);
         
         // format spinner data for react-custom-roulette
@@ -224,12 +214,6 @@ function CompetitionCards() {
         {/* Competition Cards Grid */}
         {cardsToShow.length === 0 ? (
          <div className="flex flex-col items-center justify-center gap-8 min-h-screen text-white p-4" style={{backgroundColor: '#121212'}}>
-          {/* Decorative background elements */}
-          {/* <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-20 left-20 w-72 h-72 bg-yellow-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse"></div>
-            <div className="absolute bottom-20 right-20 w-72 h-72 bg-yellow-400 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '1s'}}></div>
-            <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-yellow-600 rounded-full mix-blend-screen filter blur-3xl opacity-5"></div>
-          </div> */}
 
           {/* Title */}
           <div className="relative z-10 text-center mb-4">

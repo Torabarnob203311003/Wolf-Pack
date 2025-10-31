@@ -22,8 +22,6 @@ const TicketPurchaseSection = ({ ticketPrice = 30, maxTickets = 50, raffle }) =>
     };
 
     const handleBuyTickets = async () => {
-        console.log(user);
-        
         // Validation checks
         if(!user){
             alert('Please login to purchase tickets');
