@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 const CARDS_PER_PAGE = 12;
 
 function CompetitionCards() {
-  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [activeFilter, setActiveFilter] = useState('prize');
   const [currentPage, setCurrentPage] = useState(1);
   const [allCards, setAllCards] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +20,9 @@ function CompetitionCards() {
   const [prizeNumber, setPrizeNumber] = useState(0);
 
   const filterButtons = [
-    { id: 'ALL', label: 'ALL' },
-    { id: 'spin', label: 'SPIN' },
+    // { id: 'ALL', label: 'ALL' },
     { id: 'prize', label: 'PRIZE' },
+    { id: 'spin', label: 'SPIN' },
   ];
 
   const handleSpinClick = async () => {
@@ -88,46 +88,47 @@ function CompetitionCards() {
   };
 
   const fetchRaffles = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosSecure('/raffles/get-all-raffle');
-        const data = response.data;
+    try {
+      setLoading(true);
+      const response = await axiosSecure('/raffles/get-all-raffle');
+      const data = response.data;
 
-        if (data.success && data.data) {
-          const transformedCards = data.data.map((raffle) => ({
-            id: raffle._id,
-            title: raffle.title,
-            price: `£${raffle.price} per entry`,
-            progress: Math.floor((raffle.ticketSold / raffle.totalTicket) * 100),
-            progressText: `${raffle.ticketSold}/${raffle.totalTicket}`,
-            image: raffle.thumbnail,
-            details: raffle.details,
-            totalTicket: raffle.totalTicket,
-            ticketSold: raffle.ticketSold,
-            perUserTicketLimit: raffle.perUserTicketLimit,
-            type: raffle.type, // 'spin' or 'prize'
-          }));
-          setAllCards(transformedCards);
-        }
-      } catch (err) {
-        console.error('Error fetching raffles:', err);
-        setError('Failed to load raffles');
-      } finally {
-        setLoading(false);
+      if (data.success && data.data) {
+        const activeRaffle = data.data.filter((raffle)=> raffle.status === true);
+        
+        const transformedCards = activeRaffle.map((raffle) => ({
+          id: raffle._id,
+          title: raffle.title,
+          price: `£${raffle.price} per entry`,
+          progress: Math.floor((raffle.ticketSold / raffle.totalTicket) * 100),
+          progressText: `${raffle.ticketSold}/${raffle.totalTicket}`,
+          image: raffle.thumbnail,
+          details: raffle.details,
+          totalTicket: raffle.totalTicket,
+          ticketSold: raffle.ticketSold,
+          perUserTicketLimit: raffle.perUserTicketLimit,
+          type: raffle.type,
+          status: raffle.status,
+        }));
+        
+        setAllCards(transformedCards);
       }
-    };
-
+    } catch (err) {
+      console.error('Error fetching raffles:', err);
+      setError('Failed to load raffles');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-
-  fetchRaffles();
-    
-  fetchSpinner();
+    fetchRaffles();
+    fetchSpinner();
   }, []);
 
   // Filter cards based on active filter
   const getFilteredCards = () => {
-    if (activeFilter === 'ALL') {
+    if (activeFilter === 'prize') {
       return allCards;
     }
     return allCards.filter(card => card.type === activeFilter);
@@ -179,6 +180,26 @@ function CompetitionCards() {
           >
             COMPETITIONS
           </h2>
+
+          {/* Reviews */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-300">Reviews</span>
+              <span className="text-white font-semibold">2,006</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span key={star} className="text-green-400 text-lg leading-none">★</span>
+                ))}
+              </div>
+              <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded leading-none">4.7</span>
+            </div>
+            
+            <span className="text-white font-semibold">Trustpilot</span>
+          </div>
+
           {/* Filter Buttons */}
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
             {filterButtons.map((button) => (
@@ -197,91 +218,78 @@ function CompetitionCards() {
               </button>
             ))}
           </div>
-          {/* Reviews */}
-          <div className="flex items-center justify-center gap-2 text-sm mb-8">
-            <span className="text-gray-300">Reviews</span>
-            <span className="text-white font-semibold">2,006</span>
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span key={star} className="text-green-400 text-lg">★</span>
-              ))}
-            </div>
-            <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded ml-2">4.7</span>
-            <span className="text-white font-semibold">Trustpilot</span>
-          </div>
-        </div>
 
-        {/* Competition Cards Grid */}
-        {cardsToShow.length === 0 ? (
-         <div className="flex flex-col items-center justify-center gap-8 min-h-screen text-white p-4" style={{backgroundColor: '#121212'}}>
+          {activeFilter === 'spin'  && <>
+             <div className="flex flex-col items-center justify-center gap-8 min-h-screen text-white p-4" style={{backgroundColor: '#121212'}}>
+              {/* Title */}
+              <div className="relative z-10 text-center mb-4">
+                <h1 className="text-5xl font-bold bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 bg-clip-text text-transparent drop-shadow-lg">
+                  Spin & Win
+                </h1>
+                <p className="text-gray-400 mt-2 text-lg">Try your luck and win amazing prizes!</p>
+              </div>
 
-          {/* Title */}
-          <div className="relative z-10 text-center mb-4">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 bg-clip-text text-transparent drop-shadow-lg">
-              Spin & Win
-            </h1>
-            <p className="text-gray-400 mt-2 text-lg">Try your luck and win amazing prizes!</p>
-          </div>
+              {/* Wheel Container with glow effect */}
+              <div className="relative z-10">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full blur-2xl opacity-20 animate-pulse"></div>
+                
+                <div className="relative p-8 rounded-full" style={{backgroundColor: 'rgba(18, 18, 18, 0.6)'}}>
+                  <Wheel
+                    mustStartSpinning={mustSpin}
+                    prizeNumber={prizeNumber}
+                    data={segments.length > 0 ? segments : [{ option: 'Loading...' }]}
+                    outerBorderColor={['#FFD700']}
+                    outerBorderWidth={8}
+                    innerBorderColor={['#1a1a1d']}
+                    innerBorderWidth={8}
+                    radiusLineColor={['#333']}
+                    radiusLineWidth={3}
+                    backgroundColors={[
+                      '#00C4CC', 
+                      '#F9A602',
+                      '#F94144',
+                      '#6A5ACD',
+                    ]}
+                    textColors={['#fff']}
+                    fontSize={16}
+                    onStopSpinning={() => setMustSpin(false)}
+                    pointerProps={{style: {display: 'none'}}}
+                  />
 
-          {/* Wheel Container with glow effect */}
-          <div className="relative z-10">
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full blur-2xl opacity-20 animate-pulse"></div>
-            
-            <div className="relative p-8 rounded-full" style={{backgroundColor: 'rgba(18, 18, 18, 0.6)'}}>
-              <Wheel
-                mustStartSpinning={mustSpin}
-                prizeNumber={prizeNumber}
-                data={segments.length > 0 ? segments : [{ option: 'Loading...' }]}
-                outerBorderColor={['#FFD700']}
-                outerBorderWidth={8}
-                innerBorderColor={['#1a1a1d']}
-                innerBorderWidth={8}
-                radiusLineColor={['#333']}
-                radiusLineWidth={3}
-                backgroundColors={[
-                  '#00C4CC', 
-                  '#F9A602',
-                  '#F94144',
-                  '#6A5ACD',
-                ]}
-                textColors={['#fff']}
-                fontSize={16}
-                onStopSpinning={() => setMustSpin(false)}
-                pointerProps={{style: {display: 'none'}}}
-              />
-
-              {/* Pointer with enhanced styling */}
-              <div className="absolute inset-0 flex items-start justify-center pointer-events-none">
-                <div className="relative mt-[-20px]">
-                  <div className="absolute inset-0 w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-t-[30px] border-t-yellow-400 blur-sm"></div>
-                  <div className="relative w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-t-[30px] border-t-yellow-400 drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]"></div>
+                  {/* Pointer with enhanced styling */}
+                  <div className="absolute inset-0 flex items-start justify-center pointer-events-none">
+                    <div className="relative mt-[-20px]">
+                      <div className="absolute inset-0 w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-t-[30px] border-t-yellow-400 blur-sm"></div>
+                      <div className="relative w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-t-[30px] border-t-yellow-400 drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Spin Button with enhanced styling */}
+              <button
+                onClick={handleSpinClick}
+                disabled={mustSpin}
+                className="relative z-10 group px-12 py-4 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black font-bold text-xl tracking-wider hover:scale-110 active:scale-95 transition-all duration-300 shadow-[0_0_30px_rgba(255,215,0,0.4)] hover:shadow-[0_0_40px_rgba(255,215,0,0.7)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <span className="relative z-10 flex items-center gap-3">
+                  <svg className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  </svg>
+                  {mustSpin ? 'SPINNING...' : 'SPIN NOW'}
+                </span>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-300 to-yellow-600 opacity-0 group-hover:opacity-100 blur transition-opacity duration-300"></div>
+              </button>
+
+              {/* Additional info text */}
+              <p className="relative z-10 text-gray-500 text-sm animate-pulse">
+                Click the button to spin the wheel
+              </p>
             </div>
-          </div>
-
-          {/* Spin Button with enhanced styling */}
-          <button
-            onClick={handleSpinClick}
-            disabled={mustSpin}
-            className="relative z-10 group px-12 py-4 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black font-bold text-xl tracking-wider hover:scale-110 active:scale-95 transition-all duration-300 shadow-[0_0_30px_rgba(255,215,0,0.4)] hover:shadow-[0_0_40px_rgba(255,215,0,0.7)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              <svg className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-              </svg>
-              {mustSpin ? 'SPINNING...' : 'SPIN NOW'}
-            </span>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-300 to-yellow-600 opacity-0 group-hover:opacity-100 blur transition-opacity duration-300"></div>
-          </button>
-
-          {/* Additional info text */}
-          <p className="relative z-10 text-gray-500 text-sm animate-pulse">
-            Click the button to spin the wheel
-          </p>
-        </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 px-2 sm:px-0">
+          </>}
+          
+          {activeFilter === 'prize'  && <>
+             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 px-2 sm:px-0">
             {cardsToShow.map((card) => (
               <div
                 key={card.id}
@@ -357,7 +365,8 @@ function CompetitionCards() {
               </div>
             ))}
           </div>
-        )}
+          </>}
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (

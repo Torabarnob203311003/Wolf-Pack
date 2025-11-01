@@ -404,7 +404,7 @@ const SignUp = () => {
           <button
             onClick={handleVerificationContinue}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 font-semibold py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all disabled:opacity-50 flex items-center justify-center"
+            className="w-full bg-gradient-to-r from-[#E28B27] to-yellow-600 text-gray-900 font-semibold py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all disabled:opacity-50 flex items-center justify-center"
           >
             {loading ? <Loader2 className="animate-spin" size={20} /> : 'Continue'}
           </button>
