@@ -71,6 +71,8 @@ const SignUp = () => {
   // Validate Step 2
   const validateStep2 = () => {
     const newErrors = {};
+    console.log("from  validation", formData.currency);
+    
     if (!formData.currency) newErrors.currency = 'Currency is required';
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
@@ -80,17 +82,49 @@ const SignUp = () => {
   };
 
   // API Integration Functions
+  // const registerUser = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await axiosSecure.post('/users/create-user',{
+  //       ...formData,
+  //       isPolicyAccepted: true
+  //     });
+      
+  //     const data = response.data;
+  //   console.log(data);
+        
+  //     if (data.success) {
+  //       setStep(3);
+  //       return data;
+  //     } else {
+  //       setErrors({ api: data.message || 'Registration failed' });
+  //       return null;
+  //     }
+  //   } catch (error) {
+  //       console.log(error)
+  //     setErrors({ api: error.response?.data?.errorSources[0].message || 'Network error. Please try again.' });
+  //     return null;
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const registerUser = async () => {
     setLoading(true);
     try {
-      const response = await axiosSecure.post('/users/create-user',{
+      // 🧠 ensure currency is a string, not array
+      const cleanCurrency =
+        Array.isArray(formData.currency) ? formData.currency[0] : formData.currency;
+
+      const response = await axiosSecure.post('/users/create-user', {
         ...formData,
-        isPolicyAccepted: true
+        currency: cleanCurrency,
+        isPolicyAccepted: true,
       });
-      
+
       const data = response.data;
-    console.log(data);
-        
+      console.log(data);
+
       if (data.success) {
         setStep(3);
         return data;
@@ -99,13 +133,20 @@ const SignUp = () => {
         return null;
       }
     } catch (error) {
-        console.log(error)
-      setErrors({ api: error.response?.data?.errorSources[0].message || 'Network error. Please try again.' });
+      console.log(error);
+      setErrors({
+        api:
+          error.response?.data?.errorSources?.[0]?.message ||
+          'Network error. Please try again.',
+      });
+      
       return null;
     } finally {
       setLoading(false);
     }
   };
+
+
 
   const verifyCode = async () => {
     setLoading(true);

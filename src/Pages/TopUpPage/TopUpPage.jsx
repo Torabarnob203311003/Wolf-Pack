@@ -75,9 +75,9 @@ const TopUpPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-start mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Top Up Your Account</h1>
           <p className="text-gray-400">Buy points instantly with secure payments</p>
         </div>
