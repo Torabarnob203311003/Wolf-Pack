@@ -1,13 +1,99 @@
 import { useState } from 'react';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, X } from 'lucide-react';
 import axiosSecure from '../../lib/axiosSecure';
 import { useAuth } from '../../context/AuthContext';
 
 const TicketPurchaseSection = ({ ticketPrice = 30, maxTickets = 50, raffle }) => {
     const [ticketCount, setTicketCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [showQuiz, setShowQuiz] = useState(false);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [userAnswer, setUserAnswer] = useState('');
     const totalPrice = ticketCount * ticketPrice;
     const {user} = useAuth();
+
+    const questions = [
+        {
+            question: "What is 2 + 2?",
+            answer: "4"
+        },
+        {
+            question: "What is the capital of France?",
+            answer: "paris"
+        },
+        {
+            question: "How many days are in a week?",
+            answer: "7"
+        },
+        {
+            question: "What color is the sky on a clear day?",
+            answer: "blue"
+        },
+        {
+            question: "What is 10 - 5?",
+            answer: "5"
+        },
+        {
+            question: "How many hours are in a day?",
+            answer: "24"
+        },
+        {
+            question: "What is the opposite of hot?",
+            answer: "cold"
+        },
+        {
+            question: "What do you call a baby dog?",
+            answer: "puppy"
+        },
+        {
+            question: "How many sides does a triangle have?",
+            answer: "3"
+        },
+        {
+            question: "What is the largest planet in our solar system?",
+            answer: "jupiter"
+        },
+        {
+            question: "What is the color of grass?",
+            answer: "green"
+        },
+        {
+            question: "What is 3 × 3?",
+            answer: "9"
+        },
+        {
+            question: "How many months are in a year?",
+            answer: "12"
+        },
+        {
+            question: "What is the capital of England?",
+            answer: "london"
+        },
+        {
+            question: "What do you use to write on paper?",
+            answer: "pen"
+        },
+        {
+            question: "What is 15 ÷ 3?",
+            answer: "5"
+        },
+        {
+            question: "What is the freezing point of water in Celsius?",
+            answer: "0"
+        },
+        {
+            question: "How many legs does a spider have?",
+            answer: "8"
+        },
+        {
+            question: "What is the color of the sun?",
+            answer: "yellow"
+        },
+        {
+            question: "What is 100 ÷ 10?",
+            answer: "10"
+        }
+    ];
 
     const handleDecrease = () => {
         setTicketCount(prev => Math.max(1, prev - 1));
@@ -19,6 +105,41 @@ const TicketPurchaseSection = ({ ticketPrice = 30, maxTickets = 50, raffle }) =>
 
     const handleSliderChange = (e) => {
         setTicketCount(parseInt(e.target.value));
+    };
+
+    const handleGetLuckyDip = () => {
+        if (ticketCount < 1) {
+            alert('Please select at least 1 ticket');
+            return;
+        }
+        setShowQuiz(true);
+        setCurrentQuestionIndex(Math.floor(Math.random() * questions.length));
+        setUserAnswer('');
+    };
+
+    const handleQuizSubmit = () => {
+        const currentQuestion = questions[currentQuestionIndex];
+        
+        // Case-insensitive comparison and trim whitespace
+        if (userAnswer.trim().toLowerCase() === currentQuestion.answer.toLowerCase()) {
+            setShowQuiz(false);
+            handleBuyTickets();
+        } else {
+            // Try another random question
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * questions.length);
+            } while (newIndex === currentQuestionIndex);
+            
+            setCurrentQuestionIndex(newIndex);
+            setUserAnswer('');
+            alert('Incorrect answer. Try another question!');
+        }
+    };
+
+    const handleQuizClose = () => {
+        setShowQuiz(false);
+        setUserAnswer('');
     };
 
     const handleBuyTickets = async () => {
@@ -178,7 +299,7 @@ const TicketPurchaseSection = ({ ticketPrice = 30, maxTickets = 50, raffle }) =>
 
                     {/* GET LUCKY DIP Button */}
                     <button
-                        onClick={handleBuyTickets}
+                        onClick={handleGetLuckyDip}
                         disabled={loading || isRaffleClosed || isSoldOut}
                         className="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px]"
                     >
@@ -209,6 +330,62 @@ const TicketPurchaseSection = ({ ticketPrice = 30, maxTickets = 50, raffle }) =>
                     )}
                 </div>
             </div>
+
+            {/* Quiz Modal */}
+            {showQuiz && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-md w-full border border-yellow-500">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-yellow-500 font-bold text-lg">Lucky Dip Challenge</h3>
+                            <button
+                                onClick={handleQuizClose}
+                                className="text-gray-400 hover:text-white transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        
+                        <div className="mb-6">
+                            <p className="text-white mb-4 text-center">
+                                Answer this simple question to get your lucky dip tickets!
+                            </p>
+                            <div className="bg-black p-4 rounded-lg border border-gray-700">
+                                <p className="text-yellow-500 font-semibold text-center text-lg mb-4">
+                                    {questions[currentQuestionIndex].question}
+                                </p>
+                                <input
+                                    type="text"
+                                    value={userAnswer}
+                                    onChange={(e) => setUserAnswer(e.target.value)}
+                                    placeholder="Enter your answer..."
+                                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleQuizSubmit();
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleQuizClose}
+                                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleQuizSubmit}
+                                disabled={!userAnswer.trim()}
+                                className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Submit Answer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style jsx>
                 {`
