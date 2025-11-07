@@ -35,7 +35,10 @@ function CompetitionCards() {
     
       const res = await axiosSecure.post('/spinner/start-spin', {
         userId: user._id,
+        userName: user.userName,
+        email: user.email
       });
+      
       const apiData = res.data;
 
       if (!apiData?.success || !apiData.data?.prize) {
