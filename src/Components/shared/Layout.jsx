@@ -4,6 +4,7 @@ import Hero from "../Hero/Hero";
 import FacebookBanner from "../Facebookbanner/Facebookbanner";
 import Footer from "../Common/Footer";
 import About from "../Common/About";
+import { Toaster } from "react-hot-toast";
 
 function Layout() {
   const location = useLocation();
@@ -18,6 +19,7 @@ function Layout() {
           <FacebookBanner />
         </>
       )}
+      <Toaster/>
       <Outlet />
       <Footer />
      

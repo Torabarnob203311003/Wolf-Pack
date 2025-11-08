@@ -10,7 +10,7 @@ function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
-
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -29,6 +29,7 @@ function Navbar() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+
   }, []);
 
   // Generate consistent gradient based on username
@@ -102,7 +103,7 @@ function Navbar() {
               {/* Points Display */}
               <div className="flex items-center h-10 gap-2 px-3 py-1.5 bg-gradient-to-r from-yellow-600/20 to-yellow-500/20 border border-yellow-600/30 rounded-full">
                 <Coins className="w-4 h-4 text-yellow-500" />
-                <span className="text-sm font-semibold text-yellow-500">{userPoints}</span>
+                <span className="text-sm font-semibold text-yellow-500">{user?.credit}</span>
               </div>
 
               {/* User Profile Button */}
@@ -146,7 +147,7 @@ function Navbar() {
                     {/* Points in dropdown */}
                     <div className="flex items-center gap-2 px-2 py-1.5 bg-yellow-500/10 border border-yellow-600/20 rounded">
                       <Coins className="w-4 h-4 text-yellow-500" />
-                      <span className="text-xs font-medium text-yellow-500">{userPoints} Points</span>
+                      <span className="text-xs font-medium text-yellow-500">{user?.credit} Points</span>
                     </div>
                   </div>
 

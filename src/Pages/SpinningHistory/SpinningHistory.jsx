@@ -1,288 +1,220 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import axiosSecure from '../../lib/axiosSecure';
+import { useAuth } from '../../context/AuthContext';
 
 const SpinningHistoryPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [spinnerHistory, setSpinnerHistory] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [componentLoading, setComponentLoading] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const { user, loading } = useAuth();
   const itemsPerPage = 10;
 
-  // Mock data - replace with your actual data
-  const spinnerHistory = [
-    {
-      id: '1',
-      prize: 'JACKPOT',
-      prizeValue: 1000,
-      spinDate: '2024-01-15 14:30:25'
-    },
-    {
-      id: '2',
-      prize: 'Big Win',
-      prizeValue: 500,
-      spinDate: '2024-01-15 14:25:10'
-    },
-    {
-      id: '3',
-      prize: 'Small Win',
-      prizeValue: 50,
-      spinDate: '2024-01-15 14:20:45'
-    },
-    {
-      id: '4',
-      prize: 'No Win',
-      prizeValue: 0,
-      spinDate: '2024-01-15 14:15:30'
-    },
-    {
-      id: '5',
-      prize: 'Medium Win',
-      prizeValue: 100,
-      spinDate: '2024-01-15 14:10:15'
-    },
-    {
-      id: '6',
-      prize: 'JACKPOT',
-      prizeValue: 2000,
-      spinDate: '2024-01-15 14:05:00'
-    },
-    {
-      id: '7',
-      prize: 'No Win',
-      prizeValue: 0,
-      spinDate: '2024-01-15 14:00:45'
-    },
-    // Add more mock data as needed...
-  ];
+  // Fetch paginated spin history
+  const fetchUserSpinHistory = async (page = 1) => {
+    try {
+      setComponentLoading(true);
+      const { data } = await axiosSecure.get(
+        `/spinner/user-spinning-history-and-overview?id=${user?._id}&page=${page}&limit=${itemsPerPage}`
+      );
+      setSpinnerHistory(data.data.data || []);
+      setMeta(data.data.meta);
+    } catch (error) {
+      console.error('Failed to fetch spin history:', error);
+    } finally {
+      setComponentLoading(false);
+    }
+  };
 
-  // Filter options
+  useEffect(() => {
+    if (user?._id && !loading) {
+      fetchUserSpinHistory(currentPage);
+    }
+  }, [user, loading, currentPage]);
+
+  // Filters
   const filterOptions = [
     { value: 'all', label: 'All Spins' },
     { value: 'jackpot', label: 'Jackpots' },
     { value: 'win', label: 'Wins Only' },
-    { value: 'no-win', label: 'No Wins' }
+    { value: 'no-win', label: 'No Wins' },
   ];
 
-  // Calculate statistics
-  const stats = useMemo(() => {
-    const totalSpins = spinnerHistory.length;
-    const totalWinning = spinnerHistory.reduce((sum, spin) => sum + spin.prizeValue, 0);
-    const totalJackpots = spinnerHistory.filter(spin => spin.prize === 'JACKPOT').length;
-    const biggestWin = Math.max(...spinnerHistory.map(spin => spin.prizeValue));
-    
-    return {
-      totalSpins,
-      totalWinning,
-      totalJackpots,
-      biggestWin
-    };
-  }, [spinnerHistory]);
-
-  // Filter and paginate data
   const filteredHistory = useMemo(() => {
-    let filtered = spinnerHistory;
-    
     switch (selectedFilter) {
       case 'jackpot':
-        filtered = spinnerHistory.filter(spin => spin.prize === 'JACKPOT');
-        break;
+        return spinnerHistory.filter((s) => s.reward?.toLowerCase() === 'jackpot');
       case 'win':
-        filtered = spinnerHistory.filter(spin => spin.prizeValue > 0);
-        break;
+        return spinnerHistory.filter((s) => s.value > 0);
       case 'no-win':
-        filtered = spinnerHistory.filter(spin => spin.prizeValue === 0);
-        break;
+        return spinnerHistory.filter((s) => s.value === 0);
       default:
-        filtered = spinnerHistory;
+        return spinnerHistory;
     }
-    
-    return filtered;
   }, [spinnerHistory, selectedFilter]);
 
-  const paginatedHistory = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredHistory.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredHistory, currentPage]);
+  // Stats
+  const stats = useMemo(() => {
+    const totalSpins = meta?.totalSpins || 0;
+    const totalWinning = spinnerHistory.reduce((sum, spin) => sum + (spin.value || 0), 0);
+    const totalJackpots = spinnerHistory.filter(
+      (spin) => spin.reward?.toLowerCase() === 'jackpot'
+    ).length;
+    const biggestWin = spinnerHistory.length
+      ? Math.max(...spinnerHistory.map((spin) => spin.value || 0))
+      : 0;
 
-  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
+    return { totalSpins, totalWinning, totalJackpots, biggestWin };
+  }, [spinnerHistory, meta]);
 
-  // Prize badge color function
-  const getPrizeBadgeColor = (prize) => {
-    switch (prize) {
-      case 'JACKPOT':
+  // Reward badge color
+  const getPrizeBadgeColor = (reward) => {
+    switch (reward?.toLowerCase()) {
+      case 'jackpot':
         return 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-orange-500/25';
-      case 'Big Win':
+      case '$1':
+      case '$5':
+      case '$10':
         return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/25';
-      case 'Medium Win':
-        return 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg shadow-blue-500/25';
-      case 'Small Win':
-        return 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/25';
+      case 'zero':
+      case '0':
+        return 'bg-gray-800 text-gray-400 border border-gray-700';
       default:
-        return 'bg-gray-700 text-gray-300 border border-gray-600';
+        return 'bg-purple-600 text-white';
     }
   };
+
+  // Pagination handlers
+  const totalPages = meta ? Math.ceil(meta.totalSpins / itemsPerPage) : 1;
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Loading screen
+  if (componentLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-[#0d0d0d]">
+        <div className="flex gap-2">
+          <div className="w-3 h-12 bg-[#36d7b7] rounded animate-pulse"></div>
+          <div className="w-3 h-12 bg-[#36d7b7] rounded animate-pulse delay-150"></div>
+          <div className="w-3 h-12 bg-[#36d7b7] rounded animate-pulse delay-300"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">My Spinning History</h1>
-          <p className="text-gray-400">Track your spinning activity and winnings</p>
-        </div>
+        <h1 className="text-3xl font-bold mb-2">My Spinning History</h1>
+        <p className="text-gray-400 mb-8">Track your spinning activity and winnings</p>
 
-        {/* Statistics Cards */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm mb-1">Total Spins</p>
-                <p className="text-2xl font-bold text-white">{stats.totalSpins}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <span className="text-blue-400 text-xl">🎯</span>
-              </div>
-            </div>
+          <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
+            <p className="text-gray-400 text-sm mb-1">Total Spins</p>
+            <p className="text-2xl font-bold">{stats.totalSpins}</p>
           </div>
-
-          <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm mb-1">Total Winnings</p>
-                <p className="text-2xl font-bold text-green-400">${stats.totalWinning.toLocaleString()}</p>
-              </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <span className="text-green-400 text-xl">💰</span>
-              </div>
-            </div>
+          <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
+            <p className="text-gray-400 text-sm mb-1">Total Winnings</p>
+            <p className="text-2xl font-bold text-green-400">${stats.totalWinning}</p>
           </div>
-
-          <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm mb-1">Jackpots Won</p>
-                <p className="text-2xl font-bold text-yellow-400">{stats.totalJackpots}</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                <span className="text-yellow-400 text-xl">🎰</span>
-              </div>
-            </div>
+          <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
+            <p className="text-gray-400 text-sm mb-1">Jackpots Won</p>
+            <p className="text-2xl font-bold text-yellow-400">{stats.totalJackpots}</p>
           </div>
         </div>
 
-        {/* Controls Section */}
-        <div className="bg-[#161616] rounded-xl border border-gray-800 mb-6">
-          <div className="p-6 border-b border-gray-800">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-4">
-                <h2 className="text-lg font-semibold text-white">Spin Records</h2>
-                <span className="bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-sm">
-                  {filteredHistory.length} records
-                </span>
-              </div>
-              
-              <div className="flex flex-wrap gap-3">
-                {/* Filter Buttons */}
-                <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-700">
-                  {filterOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setSelectedFilter(option.value);
-                        setCurrentPage(1);
-                      }}
-                      className={`px-4 py-2 text-sm rounded-md transition-all ${
-                        selectedFilter === option.value
-                          ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Filters */}
+        <div className="flex flex-wrap gap-2 bg-[#161616] rounded-lg p-2 border border-gray-800 mb-6">
+          {filterOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => {
+                setSelectedFilter(option.value);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-2 text-sm rounded-md transition-all ${
+                selectedFilter === option.value
+                  ? 'bg-[#DA9F0A] text-black font-semibold shadow-lg shadow-[#36d7b7]/25'
+                  : 'text-gray-400 hover:text-white hover:bg-[#1f1f1f]'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
 
-          {/* Table */}
+        {/* Table */}
+        <div className="bg-[#161616] rounded-xl border border-gray-800 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-800 bg-[#1a1a1a]">
-                  <th className="text-gray-400 text-left py-4 px-6 font-medium text-xs uppercase tracking-wider">SPIN ID</th>
-                  <th className="text-gray-400 text-left py-4 px-6 font-medium text-xs uppercase tracking-wider">PRIZE</th>
-                  <th className="text-gray-400 text-left py-4 px-6 font-medium text-xs uppercase tracking-wider">VALUE</th>
-                  <th className="text-gray-400 text-left py-4 px-6 font-medium text-xs uppercase tracking-wider">DATE & TIME</th>
+                  <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Reward</th>
+                  <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Value</th>
+                  <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800">
-                {paginatedHistory.map((spin) => (
-                  <tr 
-                    key={spin.id}
-                    className="hover:bg-[#252525] transition-all duration-200 group"
-                  >
+              <tbody>
+                {filteredHistory.map((spin) => (
+                  <tr key={spin._id} className="border-b border-gray-800 hover:bg-[#1f1f1f] transition">
                     <td className="py-4 px-6">
-                      <span className="text-white text-sm font-medium group-hover:text-blue-400 transition-colors">
-                        #{spin.id}
+                      <span
+                        className={`${getPrizeBadgeColor(
+                          spin.reward
+                        )} px-4 py-2 rounded-full text-xs font-bold uppercase`}
+                      >
+                        {spin.reward}
                       </span>
                     </td>
-                    <td className="py-4 px-6">
-                      <span className={`${getPrizeBadgeColor(spin.prize)} px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide inline-block min-w-[120px] text-center`}>
-                        {spin.prize}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className={`text-lg font-bold ${
-                        spin.prizeValue > 0 
-                          ? 'text-green-400' 
-                          : 'text-gray-400'
-                      }`}>
-                        ${spin.prizeValue.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex flex-col">
-                        <span className="text-white text-sm font-medium">
-                          {new Date(spin.spinDate).toLocaleDateString()}
-                        </span>
-                        <span className="text-gray-400 text-xs">
-                          {new Date(spin.spinDate).toLocaleTimeString()}
-                        </span>
-                      </div>
+                    <td className="py-4 px-6 font-bold text-green-400">${spin.value}</td>
+                    <td className="py-4 px-6 text-gray-400">
+                      {new Date(spin.date).toLocaleString()}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-
-            {/* Empty State */}
-            {paginatedHistory.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-4xl">🎰</span>
-                </div>
-                <h3 className="text-lg font-medium text-gray-300 mb-2">No spins found</h3>
-                <p className="text-gray-500">Try adjusting your filters to see more results</p>
-              </div>
-            )}
           </div>
 
+          {/* Empty state */}
+          {filteredHistory.length === 0 && (
+            <div className="text-center py-10 text-gray-400">
+              No spins found for this filter.
+            </div>
+          )}
+
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-800 flex items-center justify-between">
+          {meta && totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800 bg-[#1a1a1a]">
               <div className="text-sm text-gray-400">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredHistory.length)} of {filteredHistory.length} results
+                Page {meta.page} of {totalPages} ({meta.totalSpins} total spins)
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 text-sm bg-gray-800 text-gray-300 rounded-lg border border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
+                  onClick={() => handlePageChange(meta.page - 1)}
+                  disabled={meta.page === 1}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                    meta.page === 1
+                      ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                      : 'bg-[#DA9F0A] text-black hover:bg-[#DA9F0A]/80'
+                  }`}
                 >
                   Previous
                 </button>
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 text-sm bg-gray-800 text-gray-300 rounded-lg border border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
+                  onClick={() => handlePageChange(meta.page + 1)}
+                  disabled={meta.page === totalPages}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                    meta.page === totalPages
+                      ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                      : 'bg-[#DA9F0A] text-black hover:bg-[#DA9F0A]/80'
+                  }`}
                 >
                   Next
                 </button>

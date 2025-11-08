@@ -15,7 +15,7 @@ function CompetitionCards() {
   const [error, setError] = useState(null);
   const [segments, setSegments] = useState([]);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
 
@@ -32,6 +32,11 @@ function CompetitionCards() {
         toast.error('Please login to spin the wheel.');
         return;
       }
+
+      if (user.credit < 1) {
+        toast.error('You have no credits to spin the wheel.');
+        return;
+      }
     
       const res = await axiosSecure.post('/spinner/start-spin', {
         userId: user._id,
@@ -45,9 +50,11 @@ function CompetitionCards() {
         console.error('Invalid spin response:', apiData);
         return;
       }
-
+      setUser(prev => ({
+        ...prev,
+        credit: (prev.credit || 0) - 1,
+      }));
       const prize = apiData.data.prize;
-      console.log('🎯 Spin Result:', prize);
 
       // Find index of returned prize label in wheel segments
       const index = segments.findIndex(
