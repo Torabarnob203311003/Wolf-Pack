@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../../public/northStarLogo.png';
-import { User, History, Trophy, Wallet, LogOut, ChevronDown, Coins } from 'lucide-react';
+import { User, History, Trophy, Wallet, LogOut, ChevronDown, Coins, RefreshCcw } from 'lucide-react';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -184,6 +184,17 @@ function Navbar() {
                     >
                       <Wallet className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                       <span className="text-sm text-gray-300 group-hover:text-white">Top Up</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate('/swap-reward');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 transition-colors text-left group"
+                    >
+                      <RefreshCcw className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                      <span className="text-sm text-gray-300 group-hover:text-white">Swap & Withdraw Reward</span>
                     </button>
 
                     <div className="border-t border-gray-800 my-1"></div>

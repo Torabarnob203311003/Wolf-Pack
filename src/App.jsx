@@ -97,6 +97,7 @@ import SpinningHistoryPage from "./Pages/SpinningHistory/SpinningHistory";
 import RaffleHistory from "./Pages/RaffleHistory/RaffleHistory";
 import TopUpPage from "./Pages/TopUpPage/TopUpPage";
 import PrivateRoute from "./PrivateRouter/PrivateRoute";
+import RewardsSwapPage from "./Pages/RewardsSwap/RewardsSwapPage";
 
 function App() {
   return (
@@ -145,6 +146,17 @@ function App() {
               <>
                 <Navbar />
                 <SpinningHistoryPage />
+                <Footer />
+              </>
+            }
+          />
+
+          <Route
+            path="/swap-reward"
+            element={
+              <>
+                <Navbar />
+                <RewardsSwapPage />
                 <Footer />
               </>
             }
