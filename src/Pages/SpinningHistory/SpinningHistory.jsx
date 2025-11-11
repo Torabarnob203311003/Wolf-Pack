@@ -18,6 +18,7 @@ const SpinningHistoryPage = () => {
       const { data } = await axiosSecure.get(
         `/spinner/user-spinning-history-and-overview?id=${user?._id}&page=${page}&limit=${itemsPerPage}`
       );
+
       setSpinnerHistory(data.data.data || []);
       setMeta(data.data.meta);
     } catch (error) {
@@ -55,18 +56,7 @@ const SpinningHistoryPage = () => {
   }, [spinnerHistory, selectedFilter]);
 
   // Stats
-  const stats = useMemo(() => {
-    const totalSpins = meta?.totalSpins || 0;
-    const totalWinning = spinnerHistory.reduce((sum, spin) => sum + (spin.value || 0), 0);
-    const totalJackpots = spinnerHistory.filter(
-      (spin) => spin.reward?.toLowerCase() === 'jackpot'
-    ).length;
-    const biggestWin = spinnerHistory.length
-      ? Math.max(...spinnerHistory.map((spin) => spin.value || 0))
-      : 0;
 
-    return { totalSpins, totalWinning, totalJackpots, biggestWin };
-  }, [spinnerHistory, meta]);
 
   // Reward badge color
   const getPrizeBadgeColor = (reward) => {
@@ -117,15 +107,15 @@ const SpinningHistoryPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
             <p className="text-gray-400 text-sm mb-1">Total Spins</p>
-            <p className="text-2xl font-bold">{stats.totalSpins}</p>
+            <p className="text-2xl font-bold">{meta.totalSpins || 0}</p>
           </div>
           <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
             <p className="text-gray-400 text-sm mb-1">Total Winnings</p>
-            <p className="text-2xl font-bold text-green-400">${stats.totalWinning}</p>
+            <p className="text-2xl font-bold text-green-400">${meta.totalWinning || 0}</p>
           </div>
           <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
             <p className="text-gray-400 text-sm mb-1">Jackpots Won</p>
-            <p className="text-2xl font-bold text-yellow-400">{stats.totalJackpots}</p>
+            <p className="text-2xl font-bold text-yellow-400">{meta.totalJackpots || 0}</p>
           </div>
         </div>
 

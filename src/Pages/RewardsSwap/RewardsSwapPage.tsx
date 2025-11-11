@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import axiosSecure from '../../lib/axiosSecure';
 
 const RewardsSwapPage = () => {
   const [activeTab, setActiveTab] = useState('swap');
@@ -27,24 +28,43 @@ const RewardsSwapPage = () => {
   };
 
   const handleSwap = async () => {
-    const amount = Number(swapAmount);
-    if (!swapAmount || isNaN(amount) || amount <= 0) {
-      toast.error('Please enter a valid amount');
-      return;
-    }
-    if (amount > userData.rewardPoints) {
-      toast.error('Insufficient reward points');
-      return;
-    }
-    
-    setIsProcessing(true);
-    // Simulate API call
-    setTimeout(() => {
-      toast.success(`Successfully swapped ${amount} points to $${calculateCredits(amount)} credits!`);
-      setSwapAmount('');
-      setIsProcessing(false);
-    }, 1500);
-  };
+  const amount = Number(swapAmount);
+  if (!swapAmount || isNaN(amount) || amount <= 0) {
+    toast.error("Please enter a valid amount");
+    return;
+  }
+  if (amount > userData.rewardPoints) {
+    toast.error("Insufficient reward points");
+    return;
+  }
+
+  setIsProcessing(true);
+  try {
+    // Calculate credit based on your conversion rate
+    const credit = amount / userData.conversionRate;
+
+    const response = await axiosSecure.patch(`/top-up/swap`, {
+      userId: "69123e6b7327560f0a09b5d4", // replace with logged-in userId dynamically
+      credit: credit,
+      rewardPoint: amount,
+    });
+
+    toast.success(
+      `Successfully swapped ${amount} points → $${credit.toFixed(2)} credits!`
+    );
+
+    // optionally update UI locally
+    userData.rewardPoints -= amount;
+    userData.credits += credit;
+    setSwapAmount("");
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message || "Swap failed. Please try again.";
+    toast.error(message);
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   const handleWithdraw = async () => {
     const amount = Number(withdrawAmount);
@@ -220,7 +240,7 @@ const RewardsSwapPage = () => {
               </div>
 
               {/* Withdrawal Methods */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-300 mb-3">
                   Withdrawal Method
                 </label>
@@ -240,7 +260,7 @@ const RewardsSwapPage = () => {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Account Details */}
               <div>
