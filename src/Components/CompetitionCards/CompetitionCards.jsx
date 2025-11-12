@@ -15,7 +15,7 @@ function CompetitionCards() {
   const [error, setError] = useState(null);
   const [segments, setSegments] = useState([]);
   const navigate = useNavigate();
-  const { user, setUser } = useAuth();
+  const { user, setUser, refetchUser } = useAuth();
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
 
@@ -69,6 +69,7 @@ function CompetitionCards() {
       }
 
       setMustSpin(true);
+      await refetchUser();
     } catch (error) {
       console.error('❌ Spin error:', error);
     }

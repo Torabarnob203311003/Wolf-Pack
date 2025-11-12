@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import axiosSecure from '../../lib/axiosSecure';
+import { useAuth } from '../../context/AuthContext';
 
 const RewardsSwapPage = () => {
   const [activeTab, setActiveTab] = useState('swap');
@@ -9,12 +10,13 @@ const RewardsSwapPage = () => {
   const [withdrawMethod, setWithdrawMethod] = useState('');
   const [accountDetails, setAccountDetails] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const {user, refetchUser} = useAuth();
 
   // Mock user data
   const userData = {
-    rewardPoints: 5000,
-    credits: 250,
-    conversionRate: 20, // 20 points = 1 credit
+    rewardPoints: user?.rewardPoint,
+    credits: user?.credit,
+    conversionRate: 1, 
   };
 
   const withdrawMethods = [
@@ -23,7 +25,7 @@ const RewardsSwapPage = () => {
     { value: 'crypto', label: 'Cryptocurrency', icon: '₿' },
   ];
 
-  const calculateCredits = (points:number) => {
+  const calculateCredits = (points) => {
     return (points / userData.conversionRate).toFixed(2);
   };
 
@@ -44,11 +46,15 @@ const RewardsSwapPage = () => {
     const credit = amount / userData.conversionRate;
 
     const response = await axiosSecure.patch(`/top-up/swap`, {
-      userId: "69123e6b7327560f0a09b5d4", // replace with logged-in userId dynamically
+      userId: user && '_id' in user ? user._id : undefined,
       credit: credit,
       rewardPoint: amount,
     });
 
+    console.log(response.data);
+
+     await refetchUser();
+    
     toast.success(
       `Successfully swapped ${amount} points → $${credit.toFixed(2)} credits!`
     );
@@ -57,7 +63,7 @@ const RewardsSwapPage = () => {
     userData.rewardPoints -= amount;
     userData.credits += credit;
     setSwapAmount("");
-  } catch (error: any) {
+  } catch (error) {
     const message =
       error?.response?.data?.message || "Swap failed. Please try again.";
     toast.error(message);
@@ -87,6 +93,10 @@ const RewardsSwapPage = () => {
 
     setIsProcessing(true);
     // Simulate API call
+
+    await refetchUser();
+
+    
     setTimeout(() => {
       toast.success(`Withdrawal request for ${amount} points submitted successfully!`);
       setWithdrawAmount('');
@@ -108,7 +118,7 @@ const RewardsSwapPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-gradient-to-br from-[#a8820f] to-[#E7B20E] rounded-xl p-6 shadow-lg shadow-[#E7B20E]/20">
             <p className="text-black/70 text-sm mb-1 font-medium">Available Reward Points</p>
-            <p className="text-4xl font-bold text-black">{userData.rewardPoints.toLocaleString()}</p>
+            <p className="text-4xl font-bold text-black">{userData.rewardPoints}</p>
             <p className="text-black/60 text-xs mt-2">≈ ${calculateCredits(userData.rewardPoints)} USD</p>
           </div>
           <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
