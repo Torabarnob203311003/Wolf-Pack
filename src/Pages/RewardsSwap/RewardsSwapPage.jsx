@@ -304,16 +304,16 @@ const RewardsSwapPage = () => {
 
               {/* Withdraw Button */}
               <button
-                onClick={handleWithdraw}
-                disabled={isProcessing || Number(withdrawAmount) <= 0 || !withdrawMethod}
-                className={`w-full py-4 rounded-lg font-bold text-black transition ${
-                  isProcessing || Number(withdrawAmount) <= 0 || !withdrawMethod
-                    ? 'bg-gray-700 cursor-not-allowed'
-                    : 'bg-[#E7B20E] hover:bg-[#2bc4a4] shadow-lg shadow-[#E7B20E]/25'
-                }`}
-              >
-                {isProcessing ? 'Processing...' : 'Request Withdrawal'}
-              </button>
+  onClick={handleWithdraw}
+  disabled={isProcessing || Number(withdrawAmount) <= 0 || !accountDetails}
+  className={`w-full py-4 rounded-lg font-bold text-black transition ${
+    isProcessing || Number(withdrawAmount) <= 0 || !accountDetails
+      ? 'bg-gray-700 cursor-not-allowed'
+      : 'bg-[#E7B20E] hover:bg-[#e9b005] shadow-lg shadow-[#E7B20E]/25'
+  }`}
+>
+  {isProcessing ? 'Processing...' : 'Request Withdrawal'}
+</button>
 
               {/* Warning Box */}
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
