@@ -2,13 +2,11 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import axiosSecure from '../../lib/axiosSecure';
 import { useAuth } from '../../context/AuthContext';
+import WithdrawSection from '../../Components/WithdrawSection/WithdrawSection';
 
 const RewardsSwapPage = () => {
   const [activeTab, setActiveTab] = useState('swap');
   const [swapAmount, setSwapAmount] = useState('');
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [withdrawMethod, setWithdrawMethod] = useState('');
-  const [accountDetails, setAccountDetails] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const {user, refetchUser} = useAuth();
 
@@ -18,12 +16,6 @@ const RewardsSwapPage = () => {
     credits: user?.credit,
     conversionRate: 1, 
   };
-
-  const withdrawMethods = [
-    { value: 'paypal', label: 'PayPal', icon: '💳' },
-    { value: 'bank', label: 'Bank Transfer', icon: '🏦' },
-    { value: 'crypto', label: 'Cryptocurrency', icon: '₿' },
-  ];
 
   const calculateCredits = (points) => {
     return (points / userData.conversionRate).toFixed(2);
@@ -71,39 +63,6 @@ const RewardsSwapPage = () => {
     setIsProcessing(false);
   }
 };
-
-  const handleWithdraw = async () => {
-    const amount = Number(withdrawAmount);
-    if (!withdrawAmount || isNaN(amount) || amount <= 0) {
-      toast.error('Please enter a valid amount');
-      return;
-    }
-    if (amount > userData.rewardPoints) {
-      toast.error('Insufficient reward points');
-      return;
-    }
-    if (!withdrawMethod) {
-      toast.error('Please select a withdrawal method');
-      return;
-    }
-    if (!accountDetails) {
-      toast.error('Please enter account details');
-      return;
-    }
-
-    setIsProcessing(true);
-    // Simulate API call
-
-    await refetchUser();
-
-    
-    setTimeout(() => {
-      toast.success(`Withdrawal request for ${amount} points submitted successfully!`);
-      setWithdrawAmount('');
-      setAccountDetails('');
-      setIsProcessing(false);
-    }, 1500);
-  };
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white p-6">
@@ -221,109 +180,7 @@ const RewardsSwapPage = () => {
         )}
 
         {/* Withdraw Section */}
-        {activeTab === 'withdraw' && (
-          <div className="bg-[#161616] rounded-xl border border-gray-800 p-6">
-            <h2 className="text-xl font-bold mb-4">Withdraw Reward Points</h2>
-            <p className="text-gray-400 text-sm mb-6">Cash out your reward points directly to your preferred payment method</p>
-
-            <div className="space-y-6">
-              {/* Amount Input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Amount (Points)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    placeholder="Enter points to withdraw"
-                    className="w-full bg-[#1f1f1f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#E7B20E] focus:ring-2 focus:ring-[#E7B20E]/20 transition"
-                  />
-                  <button
-                    onClick={() => setWithdrawAmount(String(userData.rewardPoints))}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs font-medium transition"
-                  >
-                    MAX
-                  </button>
-                </div>
-              </div>
-
-              {/* Withdrawal Methods */}
-              {/* <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Withdrawal Method
-                </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {withdrawMethods.map((method) => (
-                    <button
-                      key={method.value}
-                      onClick={() => setWithdrawMethod(method.value)}
-                      className={`p-4 rounded-lg border-2 transition ${
-                        withdrawMethod === method.value
-                          ? 'border-[#E7B20E] bg-[#E7B20E]/10'
-                          : 'border-gray-700 bg-[#1f1f1f] hover:border-gray-600'
-                      }`}
-                    >
-                      <div className="text-3xl mb-2">{method.icon}</div>
-                      <div className="text-sm font-medium">{method.label}</div>
-                    </button>
-                  ))}
-                </div>
-              </div> */}
-
-              {/* Account Details */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Account Details
-                </label>
-                <textarea
-                  value={accountDetails}
-                  onChange={(e) => setAccountDetails(e.target.value)}
-                  placeholder={`Enter your ${withdrawMethod ? withdrawMethods.find(m => m.value === withdrawMethod)?.label : 'payment'} account details...`}
-                  rows={3}
-                  className="w-full bg-[#1f1f1f] border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#E7B20E] focus:ring-2 focus:ring-[#E7B20E]/20 transition resize-none"
-                />
-              </div>
-
-              {/* Conversion Display */}
-              {Number(withdrawAmount) > 0 && (
-                <div className="bg-[#1f1f1f] border border-gray-700 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-400 text-sm">Withdrawal amount</p>
-                      <p className="text-2xl font-bold text-[#E7B20E]">${calculateCredits(Number(withdrawAmount))}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-400 text-sm">Processing fee</p>
-                      <p className="text-sm font-medium">$0.00</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Withdraw Button */}
-              <button
-  onClick={handleWithdraw}
-  disabled={isProcessing || Number(withdrawAmount) <= 0 || !accountDetails}
-  className={`w-full py-4 rounded-lg font-bold text-black transition ${
-    isProcessing || Number(withdrawAmount) <= 0 || !accountDetails
-      ? 'bg-gray-700 cursor-not-allowed'
-      : 'bg-[#E7B20E] hover:bg-[#e9b005] shadow-lg shadow-[#E7B20E]/25'
-  }`}
->
-  {isProcessing ? 'Processing...' : 'Request Withdrawal'}
-</button>
-
-              {/* Warning Box */}
-              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                <p className="text-yellow-400 text-sm">
-                  ⚠️ Withdrawal requests are processed within 24-48 hours. Minimum withdrawal: 1000 points.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === 'withdraw' && ( <WithdrawSection/> )}
 
         {/* Recent Transactions */}
         <div className="mt-8 bg-[#161616] rounded-xl border border-gray-800 p-6">
