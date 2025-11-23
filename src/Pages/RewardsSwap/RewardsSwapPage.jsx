@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import axiosSecure from '../../lib/axiosSecure';
 import { useAuth } from '../../context/AuthContext';
@@ -8,7 +8,8 @@ const RewardsSwapPage = () => {
   const [activeTab, setActiveTab] = useState('swap');
   const [swapAmount, setSwapAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const {user, refetchUser} = useAuth();
+  const [withdrawalHistory, setWithdrawalHistory] = useState([]);
+  const { user, refetchUser } = useAuth();
 
   // Mock user data
   const userData = {
@@ -22,47 +23,61 @@ const RewardsSwapPage = () => {
   };
 
   const handleSwap = async () => {
-  const amount = Number(swapAmount);
-  if (!swapAmount || isNaN(amount) || amount <= 0) {
-    toast.error("Please enter a valid amount");
-    return;
+    const amount = Number(swapAmount);
+    if (!swapAmount || isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    if (amount > userData.rewardPoints) {
+      toast.error("Insufficient reward points");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Calculate credit based on your conversion rate
+      const credit = amount / userData.conversionRate;
+
+      const response = await axiosSecure.patch(`/top-up/swap`, {
+        userId: user && '_id' in user ? user._id : undefined,
+        credit: credit,
+        rewardPoint: amount,
+      });
+
+      console.log(response.data.status);
+      
+      await refetchUser();
+      
+      toast.success(
+        `Successfully swapped ${amount} points → $${credit.toFixed(2)} credits!`
+      );
+
+      // optionally update UI locally
+      userData.rewardPoints -= amount;
+      userData.credits += credit;
+      setSwapAmount("");
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || "Swap failed. Please try again.";
+      toast.error(message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const fetchWithdrawalHistory = async () =>{
+    try{
+      const response = await axiosSecure.get(`/withdrawal/${user.email}/user-withdrawals-history`)
+      
+      setWithdrawalHistory(response.data.data);
+    }catch(error){
+      console.error("Error fetching withdrawal history:", error);
+    }
   }
-  if (amount > userData.rewardPoints) {
-    toast.error("Insufficient reward points");
-    return;
-  }
 
-  setIsProcessing(true);
-  try {
-    // Calculate credit based on your conversion rate
-    const credit = amount / userData.conversionRate;
-
-    const response = await axiosSecure.patch(`/top-up/swap`, {
-      userId: user && '_id' in user ? user._id : undefined,
-      credit: credit,
-      rewardPoint: amount,
-    });
-
-    console.log(response.data);
-
-     await refetchUser();
-    
-    toast.success(
-      `Successfully swapped ${amount} points → $${credit.toFixed(2)} credits!`
-    );
-
-    // optionally update UI locally
-    userData.rewardPoints -= amount;
-    userData.credits += credit;
-    setSwapAmount("");
-  } catch (error) {
-    const message =
-      error?.response?.data?.message || "Swap failed. Please try again.";
-    toast.error(message);
-  } finally {
-    setIsProcessing(false);
-  }
-};
+  useEffect(()=>{
+    fetchWithdrawalHistory();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white p-6">
@@ -184,36 +199,99 @@ const RewardsSwapPage = () => {
 
         {/* Recent Transactions */}
         <div className="mt-8 bg-[#161616] rounded-xl border border-gray-800 p-6">
-          <h3 className="text-lg font-bold mb-4">Recent Transactions</h3>
-          <div className="space-y-3">
-            {[
-              { type: 'swap', amount: 1000, value: 50, date: '2025-11-08', status: 'completed' },
-              { type: 'withdraw', amount: 2000, value: 100, date: '2025-11-06', status: 'pending' },
-              { type: 'swap', amount: 500, value: 25, date: '2025-11-05', status: 'completed' },
-            ].map((transaction, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-[#1f1f1f] rounded-lg border border-gray-800 hover:border-gray-700 transition">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    transaction.type === 'swap' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
-                  }`}>
-                    {transaction.type === 'swap' ? '💱' : '💸'}
-                  </div>
-                  <div>
-                    <p className="font-medium">{transaction.type === 'swap' ? 'Swap to Credits' : 'Withdrawal'}</p>
-                    <p className="text-sm text-gray-400">{transaction.amount} points → ${transaction.value}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className={`text-sm font-medium ${
-                    transaction.status === 'completed' ? 'text-green-400' : 'text-yellow-400'
-                  }`}>
-                    {transaction.status === 'completed' ? '✓ Completed' : '⏳ Pending'}
-                  </p>
-                  <p className="text-xs text-gray-500">{transaction.date}</p>
-                </div>
+  <h3 className="text-lg font-bold mb-4">Recent Transactions</h3>
+  
+  {withdrawalHistory.length === 0 ? (
+    <div className="text-center py-10 text-gray-400">
+      <p>No withdrawal history found</p>
+    </div>
+  ) : (
+    <div className="space-y-3">
+      {withdrawalHistory.map((transaction) => {
+        const getStatusColor = (status) => {
+          switch (status) {
+            case 'completed':
+              return 'text-green-400';
+            case 'pending':
+              return 'text-yellow-400';
+            case 'cancelled':
+              return 'text-red-400';
+            case 'rejected':
+              return 'text-red-400';
+            default:
+              return 'text-gray-400';
+          }
+        };
+
+        const getStatusIcon = (status) => {
+          switch (status) {
+            case 'completed':
+              return '✓';
+            case 'pending':
+              return '⏳';
+            case 'cancelled':
+              return '✕';
+            case 'rejected':
+              return '✕';
+            default:
+              return '•';
+          }
+        };
+
+        const getMethodIcon = (method) => {
+          const methodLower = method?.toLowerCase() || '';
+          if (methodLower.includes('stripe') || methodLower.includes('paypal')) return '💳';
+          if (methodLower.includes('bank')) return '🏦';
+          if (methodLower.includes('debit') || methodLower.includes('card')) return '💳';
+          if (methodLower.includes('crypto')) return '₿';
+          return '💸';
+        };
+
+        return (
+          <div 
+            key={transaction._id} 
+            className="flex items-center justify-between p-4 bg-[#1f1f1f] rounded-lg border border-gray-800 hover:border-gray-700 transition"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/20 text-purple-400">
+                {getMethodIcon(transaction.payoutMethod)}
               </div>
-            ))}
-          </div>
+              <div>
+                <p className="font-medium capitalize">
+                  {transaction.payoutMethod.replace('-', ' ')} Withdrawal
+                </p>
+                <p className="text-sm text-gray-400">
+                  {transaction.rewardPoint} points → ${transaction.rewardPoint}
+                </p>
+                {transaction.payoutDetails?.emailOrAccountId && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    To: {transaction.payoutDetails.emailOrAccountId}
+                  </p>
+                )}
+                {transaction.payoutDetails?.bankName && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    To: {transaction.payoutDetails.bankName}
+                  </p>
+                )}
+              </div>
+            </div>
+                <div className="text-right">
+                  <p className={`text-sm font-medium ${getStatusColor(transaction.status)}`}>
+                    {getStatusIcon(transaction.status)} {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                  </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(transaction.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+            </div>
+          )}
         </div>
       </div>
     </div>

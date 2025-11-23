@@ -186,10 +186,7 @@ const WithdrawSection = () => {
           pointsType: "rewardPoint"
         }
       };
-
-      console.log(user);
       
-
       // API call - replace with your actual withdraw endpoint
       const res = await axiosSecure.post("/withdrawal/request-withdrawal", payload);
 
@@ -201,7 +198,10 @@ const WithdrawSection = () => {
         // Reset form
         setWithdrawAmount("");
         setSelectedPayoutMethod(null);
-        await refetchUser();
+        setTimeout( async ()=>{
+          await refetchUser();
+        }, 3000);
+
       } else {
         toast.error("Withdrawal failed. Please try again.");
       }
@@ -217,6 +217,8 @@ const WithdrawSection = () => {
 
   const currentMethod = payoutMethods.find(method => method.id === selectedPayoutMethod);
   const availableRewardPoints = user?.rewardPoint || 0;
+
+
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
