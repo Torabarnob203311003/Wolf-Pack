@@ -45,13 +45,13 @@ const TestimonialCard = ({ review, rating, verified }) => (
 const About = () => {
   const testimonials = [
     { id: 1, review: "Exciting real chance of winning, fun and trustworthy too. Local company people you know and can relate to, local winners showing how real it is, normal people", rating: 5, verified: true },
-    { id: 2, review: "Wolf Competitions is a fabulous site that helps each other and the community. We're paid out to your account in seconds. They also do an awful lot for charity, which I also love. Keep your Eyes On The Prize", rating: 4.5, verified: true },
+    { id: 2, review: "North Star is a fabulous site that helps each other and the community. We're paid out to your account in seconds. They also do an awful lot for charity, which I also love. Keep your Eyes On The Prize", rating: 4.5, verified: true },
     { id: 3, review: "Mint people do life changing things for people who can only dream of winning money and do for special places like food bank, sponsor and much more", rating: 5, verified: true },
     { id: 4, review: "They are a fabulous group so generous to charities. They are like one huge family. Even though I don't win very much every win is treated the same they pay out immediately with grace. I absolutely love them and love watching the videos on Facebook.", rating: 5, verified: true },
-    { id: 5, review: "great competitions and helping the community out, and I always recommend wolf competitions over other ppl who've been on other sites and they don't do all they do.", rating: 5, verified: true },
-    { id: 6, review: "Wolf Competitions are so easy to use, any wins payed into your bank within hours, usually minutes, lots of fun opportunities to win prizes", rating: 5, verified: true },
+    { id: 5, review: "great competitions and helping the community out, and I always recommend North Star over other ppl who've been on other sites and they don't do all they do.", rating: 5, verified: true },
+    { id: 6, review: "North Star are so easy to use, any wins payed into your bank within hours, usually minutes, lots of fun opportunities to win prizes", rating: 5, verified: true },
     { id: 7, review: "Mint people do life changing things for people who can only dream of winning money and do for special places like food bank, sponsor and much more", rating: 5, verified: true },
-    { id: 8, review: "Love playing wolf competitions... It's Class. Love playing wolf competitions... It's Class", rating: 4.5, verified: true },
+    { id: 8, review: "Love playing North Star... It's Class. Love playing North Star... It's Class", rating: 4.5, verified: true },
   ];
 
   return (

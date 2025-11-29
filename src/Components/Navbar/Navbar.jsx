@@ -155,6 +155,17 @@ function Navbar() {
                   <div className="py-1">
                     <button
                       onClick={() => {
+                        navigate('/profile');
+                        setIsMenuOpen(false);
+                      }}
+                     className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 transition-colors text-left group"
+                    >
+                      <User className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors"  />
+                      <span className="text-sm text-white font-medium">Profile</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
                         navigate('/spinning-history');
                         setIsDropdownOpen(false);
                       }}
