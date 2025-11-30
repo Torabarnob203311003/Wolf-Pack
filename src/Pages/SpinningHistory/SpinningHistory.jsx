@@ -111,7 +111,7 @@ const SpinningHistoryPage = () => {
           </div>
           <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
             <p className="text-gray-400 text-sm mb-1">Total Winnings</p>
-            <p className="text-2xl font-bold text-green-400">${meta.totalWinning || 0}</p>
+            <p className="text-2xl font-bold text-green-400">£{meta.totalWinning || 0}</p>
           </div>
           <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
             <p className="text-gray-400 text-sm mb-1">Jackpots Won</p>
@@ -162,7 +162,7 @@ const SpinningHistoryPage = () => {
                         {spin.reward}
                       </span>
                     </td>
-                    <td className="py-4 px-6 font-bold text-green-400">${spin.value}</td>
+                    <td className="py-4 px-6 font-bold text-green-400">£{spin.value}</td>
                     <td className="py-4 px-6 text-gray-400">
                       {new Date(spin.date).toLocaleString()}
                     </td>

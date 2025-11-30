@@ -156,7 +156,7 @@ function CompetitionCards() {
   const startIdx = (currentPage - 1) * CARDS_PER_PAGE;
   const endIdx = startIdx + CARDS_PER_PAGE;
   const cardsToShow = filteredCards.slice(startIdx, endIdx);
-
+  
   if (loading) {
     return (
       <div className="py-12 px-4 text-center">
@@ -244,24 +244,6 @@ function CompetitionCards() {
               </button>
             )}
           </div>
-          
-          {/* <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
-            {filterButtons.map((button) => (
-              <button
-                key={button.id}
-                onClick={() => setActiveFilter(button.id)}
-                className={`px-4 sm:px-6 py-2 text-xs sm:text-sm font-bold tracking-wider rounded-full border transition-all duration-200 ${activeFilter === button.id
-                  ? 'text-white border-none shadow-md'
-                  : 'text-yellow-400 border-yellow-400 hover:bg-yellow-900/10'
-                  }`}
-                style={activeFilter === button.id ? {
-                  background: 'linear-gradient(90deg, #E28B27 0%, #F5D334 29.19%, #F6D63E 32.42%, #F5D334 67.48%, #ECC92F 72.69%, #D5AC22 81.69%, #AE7F0D 93.33%, #966200 100%)'
-                } : { background: 'transparent' }}
-              >
-                {button.label}
-              </button>
-            ))}
-          </div> */}
 
           {activeFilter === 'spin'  && <>
              <div className="flex flex-col items-center justify-center gap-8 min-h-screen text-white p-4" style={{backgroundColor: '#121212'}}>
@@ -289,9 +271,13 @@ function CompetitionCards() {
                     radiusLineColor={['#333']}
                     radiusLineWidth={3}
                     backgroundColors={[
-                      '#00C4CC', 
-                      '#F9A602',
-                      '#F94144',
+                      '#06B6D4',
+                      '#8B5CF6',
+                      '#00C4CC',
+                      '#EF4444',
+                      '#8B5CF6',
+                      '#06B6D4',
+                      '#FBBF24',
                       '#6A5ACD',
                     ]}
                     textColors={['#fff']}

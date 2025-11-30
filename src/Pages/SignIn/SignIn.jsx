@@ -49,13 +49,11 @@ function SignIn() {
     e.preventDefault();
     const newErrors = validate();
 
-    if (Object.keys(newErrors).length === 0) {
-      
-      
+    if (Object.keys(newErrors).length === 0) { 
       try {
         setLoading(true);
         const response = await login(formData.username, formData.password)
-
+        
         if (response) {
           setLoading(false);
           toast('Login successful!',
@@ -69,16 +67,29 @@ function SignIn() {
               },
             }
           );
+
+
           setTimeout(() => {
             // window.location.href = '/';
             navigate('/')
           }, 700);
-        };
+        }else{
+          setLoading(false);
+          toast('Login failed. Please try again.',
+            {
+              icon: '❌',
+              style: {
+                borderRadius: '30px',
+                background: '#EF4444',
+                color: '#fff',
+                fontSize: '18px',
+              },
+            }
+          );
+        }
 
       } catch (error) {
-        setLoading(false);
-        console.log(error);
-        
+        setLoading(false);        
         toast(`${error.response?.data?.message || "Login failed. Please try again."}`,
           {
             icon: '❌',
@@ -90,7 +101,6 @@ function SignIn() {
             },
           }
         );
-
         setErrors({ submit: error.response?.data?.message || "Login failed" });
       } finally {
         setLoading(false);
@@ -236,12 +246,6 @@ function SignIn() {
           </div>
         </div>
       </div>
-
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-      />
-
     </div>
   );
 }

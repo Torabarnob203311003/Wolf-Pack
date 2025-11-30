@@ -93,11 +93,11 @@ const RewardsSwapPage = () => {
           <div className="bg-gradient-to-br from-[#a8820f] to-[#E7B20E] rounded-xl p-6 shadow-lg shadow-[#E7B20E]/20">
             <p className="text-black/70 text-sm mb-1 font-medium">Available Reward Points</p>
             <p className="text-4xl font-bold text-black">{userData.rewardPoints}</p>
-            <p className="text-black/60 text-xs mt-2">≈ ${calculateCredits(userData.rewardPoints)} USD</p>
+            <p className="text-black/60 text-xs mt-2">≈ £{calculateCredits(userData.rewardPoints)} GBP</p>
           </div>
           <div className="bg-[#161616] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition">
             <p className="text-gray-400 text-sm mb-1">Current Credits</p>
-            <p className="text-4xl font-bold text-white">${userData.credits}</p>
+            <p className="text-4xl font-bold text-white">£{userData.credits}</p>
             <p className="text-gray-500 text-xs mt-2">1 Credit = {userData.conversionRate} Points</p>
           </div>
         </div>
