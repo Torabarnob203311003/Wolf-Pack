@@ -74,7 +74,7 @@ const CardDetails = () => {
                 src={raffle.thumbnail}
                 alt={raffle.title}
                 className="w-full h-full object-cover lg:rounded-l-xl rounded-t-xl lg:rounded-tr-none"
-                style={{ minHeight: '300px', maxHeight: '500px' }}
+                style={{ minHeight: '300px', maxHeight: '600px' }}
               />
             </div>
 
