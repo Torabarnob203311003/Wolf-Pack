@@ -20,6 +20,9 @@ import AboutUs from "./Pages/AboutUs/AboutUs";
 import Terms from "./Pages/Terms/Terms";
 import Privacy from "./Pages/Privacy/Privacy";
 import CookiePolicy from "./Pages/Cookie/Cookie";
+import ForgetPassword from "./Pages/ForgetPassword/ForgetPassword";
+import VerifyOTP from "./Pages/VerifyOTP/VerifyOTP";
+import ResetPassword from "./Pages/ResetPassword/ResetPassword";
 
 function App() {
   return (
@@ -162,6 +165,9 @@ function App() {
         {/* ✅ Auth Routes */}
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgetPassword/>}/>
+        <Route path="/verify-otp" element={<VerifyOTP/>} />
+        <Route path="/reset-password" element={<ResetPassword/>} />
       </Routes>
     </Router>
   );
