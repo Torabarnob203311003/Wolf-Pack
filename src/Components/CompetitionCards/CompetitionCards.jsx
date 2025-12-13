@@ -770,10 +770,10 @@ function CompetitionCards() {
       let soundType = 'win';
       
       if (prizeType.toLowerCase().includes('jackpot') || 
-          prizeName.toLowerCase().includes('jackpot')) {
+        prizeName.toLowerCase().includes('jackpot')) {
         soundType = 'jackpot';
       } else if (prizeType.toLowerCase().includes('coin') || 
-                prizeType.toLowerCase().includes('credit')) {
+        prizeType.toLowerCase().includes('credit')) {
         soundType = 'coin';
       } else if (prizeType.toLowerCase().includes('try again') || 
                 prizeName.toLowerCase().includes('try again')) {
@@ -1170,7 +1170,7 @@ function CompetitionCards() {
                   onClick={() => navigate(`/card/${card.id}`)}
                 >
                   {/* Card Image */}
-                  <div className="relative w-full h-48">
+                  <div className="relative w-full h-full">
                     <img
                       src={card.image}
                       alt={card.title}

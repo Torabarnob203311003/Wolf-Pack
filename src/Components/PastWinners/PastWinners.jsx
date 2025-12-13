@@ -34,9 +34,9 @@ const PastWinners = () => {
         id: winner._id,
         car: winner.raffleId?.title || 'N/A',
         image: winner.raffleId?.thumbnail || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        winner: winner.userId?.userName || 'Anonymous',
-        email: winner.userId?.email || '',
-        ticketNo: winner.winningTicketId?._id?.slice(-8) || '00000000',
+        winner: winner.userId?.userName || winner?.name ||'Anonymous',
+        email: winner.userId?.email || winner?.email || '',
+        ticketNo: winner.winningTicketId?._id?.slice(-8) || '********',
         date: new Date(winner.createdAt).toLocaleDateString('en-GB', {
           day: 'numeric',
           month: 'short',
@@ -46,7 +46,7 @@ const PastWinners = () => {
           hour: '2-digit',
           minute: '2-digit'
         }),
-        prize: `$${winner.raffleId?.price || 0}`,
+        prize: `£${winner.raffleId?.price || 0}`,
         worth: `${winner.raffleId?.totalTicket || 0} TOTAL TICKETS`,
         ticketsSold: winner.raffleId?.ticketSold || 0,
         totalTickets: winner.raffleId?.totalTicket || 0,
@@ -251,14 +251,6 @@ const PastWinners = () => {
                           </div>
                         </div>
                         
-                        {/* <div className="flex items-start gap-2">
-                          <Mail className="text-gray-500 mt-0.5" size={14} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-gray-400 text-xs truncate">
-                              {card.email}
-                            </p>
-                          </div>
-                        </div> */}
                         
                         <div className="flex items-start gap-2">
                           <Ticket className="text-gray-500 mt-0.5" size={14} />

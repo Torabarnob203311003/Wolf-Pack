@@ -261,7 +261,7 @@ const RewardsSwapPage = () => {
                   {transaction.payoutMethod.replace('-', ' ')} Withdrawal
                 </p>
                 <p className="text-sm text-gray-400">
-                  {transaction.rewardPoint} points → ${transaction.rewardPoint}
+                  {transaction.rewardPoint} points → £{transaction.rewardPoint}
                 </p>
                 {transaction.payoutDetails?.emailOrAccountId && (
                   <p className="text-xs text-gray-500 mt-1">

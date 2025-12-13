@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../../public/northStarLogo.png';
+// import logo from '../../../public/northStarLogo.png';
+import logo2 from '../../../src/assets/blacklogo.png';
 import { User, History, Trophy, Wallet, LogOut, ChevronDown, Coins, RefreshCcw } from 'lucide-react';
 
 function Navbar() {
@@ -60,7 +61,7 @@ function Navbar() {
       <div className="container flex justify-between items-center mx-auto max-w-7xl">
         {/* Logo Section */}
         <div className="cursor-pointer" onClick={() => navigate('/')}>
-          <img className='h-[70px] md:h-[80px]' src={logo} alt="northstar-logo" />
+          <img className='h-[70px] md:h-[80px]' src={logo2} alt="northstar-logo" />
         </div>
 
         {/* Navigation Links - Desktop Only */}
@@ -291,7 +292,7 @@ function Navbar() {
               {/* Points in mobile */}
               <div className="flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-600/20 rounded">
                 <Coins className="w-4 h-4 text-yellow-500" />
-                <span className="text-sm font-medium text-yellow-500">{userPoints} Points</span>
+                <span className="text-sm font-medium text-yellow-500">{user?.credit} Points</span>
               </div>
             </div>
           )}
