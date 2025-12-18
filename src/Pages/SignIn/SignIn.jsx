@@ -74,7 +74,6 @@ function SignIn() {
 
     try {
       const response = await login(formData.email.trim(), formData.password);
-      
       if (response) {
         toast.success('Login successful!', {
           style: {
@@ -84,6 +83,17 @@ function SignIn() {
             fontSize: '18px',
           },
         });
+
+      if(!response){
+        toast.error('Login failed. Please check your credentials.', {
+          style: {
+            borderRadius: '30px',
+            background: '#EF4444',
+            color: '#fff',
+            fontSize: '18px',
+          },
+        });
+      }
 
         setTimeout(() => {
           navigate('/');

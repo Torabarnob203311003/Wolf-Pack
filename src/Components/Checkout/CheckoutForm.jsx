@@ -4,6 +4,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { Loader2, CreditCard, Lock, Check, X } from 'lucide-react';
 import axiosSecure from '../../lib/axiosSecure';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 // Initialize Stripe (replace with your publishable key)
 const stripePromise = loadStripe('pk_test_51PcPm62MP0L90YjvNNkd1UGVrq9nu0QWdLfYT4pIF7xAJcfykwMCNeTiZVhSswnCNFHdp2WbqZJweJcxk9IRxARE00OCcRlb8N');
@@ -37,6 +38,15 @@ const CheckoutForm = ({ ticketPrice, quantity, raffleId, onSuccess, onCancel }) 
         raffleId,
         quantity
       });
+
+      // Check nested success first
+      if (intentData.data?.success === false) {
+        toast.error(intentData.data.message || 'You cannot buy more tickets');
+        setError(intentData.data.message || 'You cannot buy more tickets');
+        setLoading(false);
+        setProcessing(false);
+        return; // stop further execution
+      }
       
       const clientSecret = intentData.data.clientSecret;
 
@@ -47,7 +57,6 @@ const CheckoutForm = ({ ticketPrice, quantity, raffleId, onSuccess, onCancel }) 
           card: elements.getElement(CardElement),
         }
       });
-      
 
       if (stripeError) {
         throw new Error(stripeError.message);

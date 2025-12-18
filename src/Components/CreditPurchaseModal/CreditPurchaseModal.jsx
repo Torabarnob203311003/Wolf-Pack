@@ -52,6 +52,12 @@ const CreditPurchaseModal = ({ isOpen, onClose, raffle, user, onSuccess }) => {
         quantity: quantity.toString()
       });
 
+      if (response.data.data?.success === false) {
+        // backend error inside data
+        toast.error(response.data.data.message || 'Purchase failed');
+        return;
+      }
+
       if (response.data.success) {
         setPurchasedTickets(response.data.tickets || []);
         setPurchaseSuccess(true);
