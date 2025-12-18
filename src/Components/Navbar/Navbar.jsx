@@ -54,7 +54,7 @@ function Navbar() {
     navigate('/');
   };
 
-  const userPoints = user?.points || 0;
+  // const userPoints = user?.points || 0;
 
   return (
     <header className="px-4 md:px-6 py-3 md:py-4 bg-black border-b border-gray-900">
@@ -165,7 +165,7 @@ function Navbar() {
                       <span className="text-sm text-white font-medium">Profile</span>
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={() => {
                         navigate('/spinning-history');
                         setIsDropdownOpen(false);
@@ -174,7 +174,7 @@ function Navbar() {
                     >
                       <History className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                       <span className="text-sm text-gray-300 group-hover:text-white">Spinning History</span>
-                    </button>
+                    </button> */}
 
                     <button
                       onClick={() => {
@@ -340,7 +340,7 @@ function Navbar() {
                   <span className="text-sm text-white font-medium">Profile</span>
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => {
                     navigate('/spinning-history');
                     setIsMenuOpen(false);
@@ -349,7 +349,7 @@ function Navbar() {
                 >
                   <History className="w-5 h-5 text-yellow-500" />
                   <span className="text-sm text-white font-medium">Spinning History</span>
-                </button>
+                </button> */}
 
                 <button
                   onClick={() => {

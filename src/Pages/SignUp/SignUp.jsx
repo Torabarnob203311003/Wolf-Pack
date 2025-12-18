@@ -16,7 +16,7 @@ const SignUp = () => {
     currency: '',
     phoneNumber: '',
     email: '',
-    referralCode: ''
+    age: ''
   });
   
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
@@ -123,7 +123,6 @@ const SignUp = () => {
       });
 
       const data = response.data;
-      console.log(data);
 
       if (data.success) {
         setStep(3);
@@ -370,17 +369,17 @@ const SignUp = () => {
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
             
-            {/* <div>
-              <label className="block text-sm text-gray-300 mb-2">Referral Code</label>
+            <div>
+              <label className="block text-sm text-gray-300 mb-2">Enter Age</label>
               <input
-                type="text"
-                name="referralCode"
-                value={formData.referralCode}
+                type="number"
+                name="age"
+                value={formData.age}
                 onChange={handleChange}
-                placeholder="Enter referral code (optional)"
+                placeholder="Enter enter your age"
                 className="w-full px-4 py-3 bg-white border border-gray-600 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:border-yellow-500"
               />
-            </div> */}
+            </div>
             
             <div className="flex items-start">
               <input type="checkbox" className="mt-1 mr-2" required />

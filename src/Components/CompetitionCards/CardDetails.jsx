@@ -36,7 +36,7 @@ const CardDetails = () => {
     return (
       <div>
         <div className="flex justify-center items-center min-h-screen">
-          <p className="text-white text-lg">Loading raffle details...</p>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
         </div>
         <FacebookBanner />
         <About />
