@@ -7,7 +7,8 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 // Initialize Stripe (replace with your publishable key)
-const stripePromise = loadStripe('pk_test_51PcPm62MP0L90YjvNNkd1UGVrq9nu0QWdLfYT4pIF7xAJcfykwMCNeTiZVhSswnCNFHdp2WbqZJweJcxk9IRxARE00OCcRlb8N');
+// const stripePromise = loadStripe('pk_test_51PcPm62MP0L90YjvNNkd1UGVrq9nu0QWdLfYT4pIF7xAJcfykwMCNeTiZVhSswnCNFHdp2WbqZJweJcxk9IRxARE00OCcRlb8N');
+const stripePromise = loadStripe('pk_live_51SSPIO45dgA4YHR7Kj2Vi6446tbMmCKBSZb0CHYYjIuQeersc9Uak4sFmFhIkLP7YYXiQgkaJbTwJLADoEnpUlZU004WxG69RL');
 
 const CheckoutForm = ({ ticketPrice, quantity, raffleId, onSuccess, onCancel }) => {
   const stripe = useStripe();
