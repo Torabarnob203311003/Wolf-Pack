@@ -23,6 +23,7 @@ import CookiePolicy from "./Pages/Cookie/Cookie";
 import ForgetPassword from "./Pages/ForgetPassword/ForgetPassword";
 import VerifyOTP from "./Pages/VerifyOTP/VerifyOTP";
 import ResetPassword from "./Pages/ResetPassword/ResetPassword";
+import Success from "./Pages/Success/Success";
 
 function App() {
   return (
@@ -160,8 +161,20 @@ function App() {
               </>
             }
           />
-        </Route>
+          <Route
+            path="/success"
+            element={
+              <>
+                <Navbar />
+                <Success />
+                <Footer />
+              </>
+            }
+          />
 
+        </Route>
+          
+  
         {/* ✅ Auth Routes */}
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
