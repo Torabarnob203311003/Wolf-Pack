@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+// import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
   CardElement,
@@ -12,9 +12,9 @@ import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 
 // Initialize Stripe (replace with your publishable key)
-const stripePromise = loadStripe(
-  "pk_test_51PcPm62MP0L90YjvNNkd1UGVrq9nu0QWdLfYT4pIF7xAJcfykwMCNeTiZVhSswnCNFHdp2WbqZJweJcxk9IRxARE00OCcRlb8N"
-);
+// const stripePromise = loadStripe(
+//   "pk_test_51PcPm62MP0L90YjvNNkd1UGVrq9nu0QWdLfYT4pIF7xAJcfykwMCNeTiZVhSswnCNFHdp2WbqZJweJcxk9IRxARE00OCcRlb8N"
+// );
 // const stripePromise = loadStripe('pk_live_51SSPIO45dgA4YHR7Kj2Vi6446tbMmCKBSZb0CHYYjIuQeersc9Uak4sFmFhIkLP7YYXiQgkaJbTwJLADoEnpUlZU004WxG69RL');
 
 const CheckoutForm = ({
@@ -206,16 +206,15 @@ const CheckoutForm = ({
 
 const PaymentModal = ({
   isOpen,
-  onClose,
-  ticketPrice,
+  // onClose,
+  // ticketPrice,
   quantity,
   raffleId,
-  raffleTitle,
+  // raffleTitle,
 }) => {
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [purchasedTickets, setPurchasedTickets] = useState([]);
+  // const [paymentSuccess, setPaymentSuccess] = useState(false);
+  // const [purchasedTickets, setPurchasedTickets] = useState([]);
   const { user } = useAuth();
-
 
   const handleCheckoutRedirect = async () => {
     const response = await axiosSecure.post('/ticket/create-ticket', {
@@ -225,8 +224,15 @@ const PaymentModal = ({
     });
 
     console.log(response.data.data);
-    
 
+    if (response.data.data?.url) {
+      window.location.href = response.data.data.url;
+    } else {
+      toast.error(response.data.data.message || 'Purchase failed');
+      return;
+    }
+
+    
 
   };
 

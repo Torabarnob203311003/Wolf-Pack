@@ -8,6 +8,7 @@ const TicketPurchaseSection = ({ ticketPrice, maxTickets, raffle }) => {
   const [quantity, setQuantity] = useState(1);
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [quizPassed, setQuizPassed] = useState(false);
 
   const handleIncrease = () => {
