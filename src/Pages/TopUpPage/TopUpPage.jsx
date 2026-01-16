@@ -150,34 +150,42 @@ const TopUpPage = () => {
       return;
     }
 
-    if (selectedMethod === "stripe") {
-      setShowStripeForm(true);
-      return;
-    }
+    // if (selectedMethod === "stripe") {
+    //   setShowStripeForm(true);
+    //   return;
+    // }
 
-    try {
+    // try {
       setIsProcessing(true);
 
       const payload = { userId: user?._id, credit: amount };
       const res = await axiosSecure.patch("/top-up", payload);
 
-      if (res.status === 200 || res.status === 201) {
-        toast.success(`🔥 You just bought ${amount} points!`, {
-          position: "top-right",
-        });
+      // console.log(res.data.data.url);
 
-        await refetchUser();
-      } else {
-        toast.error("Payment failed. Try again.");
+      if(res.data.data.url) {
+        console.log(res.data.data.url)
+        window.location.href = res.data.data.url
       }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Something went wrong 😬", {
-        position: "top-right",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+      
+      // window.location.href = res.data.data.url
+    //   if (res.status === 200 || res.status === 201) {
+    //     toast.success(`🔥 You just bought ${amount} points!`, {
+    //       position: "top-right",
+    //     });
+
+    //     await refetchUser();
+    //   } else {
+    //     toast.error("Payment failed. Try again.");
+    //   }
+    // } catch (err) {
+    //   console.error(err);
+    //   toast.error(err.response?.data?.message || "Something went wrong 😬", {
+    //     position: "top-right",
+    //   });
+    // } finally {
+    //   setIsProcessing(false);
+    // }
   };
 
   const currentPoints = customAmount
@@ -326,7 +334,7 @@ const TopUpPage = () => {
 
             {showStripeForm && selectedMethod === "stripe" ? (
               <Elements stripe={stripePromise}>
-                <CheckoutForm
+                {/* <CheckoutForm
                   amount={totalAmount}
                   onSuccess={() => {
                     setShowStripeForm(false);
@@ -334,7 +342,7 @@ const TopUpPage = () => {
                     setCustomAmount("");
                   }}
                   onCancel={() => setShowStripeForm(false)}
-                />
+                /> */}
               </Elements>
             ) : (
               <button
