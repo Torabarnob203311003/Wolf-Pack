@@ -20,7 +20,9 @@ const CreditPurchaseModal = ({ isOpen, onClose, raffle, user, onSuccess }) => {
     const max = Math.min(raffle.perUserTicketLimit, available);
     
     if (newQuantity >= 1 && newQuantity <= max) {
+
       setQuantity(newQuantity);
+      document.getElementById('quantityInput').value = Number(newQuantity) ;
     }
   };
 
@@ -162,7 +164,7 @@ const CreditPurchaseModal = ({ isOpen, onClose, raffle, user, onSuccess }) => {
                   </label>
                   <div className="flex items-center gap-4">
                     <button
-                      onClick={() => handleQuantityChange(quantity - 1)}
+                      onClick={() => handleQuantityChange(Number(quantity) - 1)}
                       disabled={quantity <= 1}
                       className="bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
                     >
@@ -170,13 +172,12 @@ const CreditPurchaseModal = ({ isOpen, onClose, raffle, user, onSuccess }) => {
                     </button>
                     
                     <div className="flex-1 bg-black border border-gray-700 rounded-lg p-3 text-center">
-                      <span className="text-white text-2xl font-bold">
-                        {quantity}
-                      </span>
+                      <input id='quantityInput' min={1} max={Math.min(raffle.perUserTicketLimit, (raffle.totalTicket - raffle.ticketSold))} defaultValue={quantity} type='number' onChange={(e)=> setQuantity(Number(e.target.value))} className="text-white w-full bg-black focus:outline-none  text-2xl font-bold appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"/>
+                      
                     </div>
                     
                     <button
-                      onClick={() => handleQuantityChange(quantity + 1)}
+                      onClick={() => handleQuantityChange(Number(quantity) + 1)}
                       disabled={quantity >= Math.min(raffle.perUserTicketLimit, raffle.totalTicket - raffle.ticketSold)}
                       className="bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
                     >

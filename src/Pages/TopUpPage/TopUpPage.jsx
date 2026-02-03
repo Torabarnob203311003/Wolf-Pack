@@ -1,113 +1,13 @@
 import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Elements, CardElement} from "@stripe/react-stripe-js";
 import { useAuth } from "../../context/AuthContext";
 import axiosSecure from "../../lib/axiosSecure";
 import toast, { Toaster } from "react-hot-toast";
 
 // Initialize Stripe
 const stripePromise = loadStripe("pk_live_51SSPIO45dgA4YHR7Kj2Vi6446tbMmCKBSZb0CHYYjIuQeersc9Uak4sFmFhIkLP7YYXiQgkaJbTwJLADoEnpUlZU004WxG69RL");
-
-const CheckoutForm = ({ amount, onSuccess, onCancel }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { user, refetchUser } = useAuth();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const { data } = await axiosSecure.post("/top-up/create-payment-intent", {
-        amount: amount * 100,
-        userId: user?._id,
-      });
-
-      const { error, paymentIntent } = await stripe.confirmCardPayment(
-        data.data.clientSecret,
-        {
-          payment_method: {
-            card: elements.getElement(CardElement),
-            billing_details: {
-              email: user?.email,
-            },
-          },
-        }
-      );
-
-      if (error) {
-        toast.error(error.message);
-      } else if (paymentIntent.status === "succeeded") {
-        const res = await axiosSecure.patch("/top-up", {
-          userId: user?._id,
-          credit: amount,
-          paymentIntentId: paymentIntent.id,
-        });
-        
-        if (res.status === 200) {
-          toast.success("Payment successful! 🎉");
-          await refetchUser();
-          onSuccess();
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Payment failed 😬");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-[#1a1a1a] p-4 rounded-lg border border-gray-700">
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: "16px",
-                color: "#ffffff",
-                "::placeholder": {
-                  color: "#9ca3af",
-                },
-              },
-              invalid: {
-                color: "#ef4444",
-              },
-            },
-          }}
-        />
-      </div>
-
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm bg-gray-800 text-white hover:bg-gray-700 transition-all"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={!stripe || isProcessing}
-          className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-            stripe && !isProcessing
-              ? "text-black bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-700 hover:shadow-lg"
-              : "bg-gray-800 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          {isProcessing ? "Processing..." : `Pay £${amount}`}
-        </button>
-      </div>
-    </form>
-  );
-};
+// const stripePromise = loadStripe("pk_test_51PcPm62MP0L90YjvNNkd1UGVrq9nu0QWdLfYT4pIF7xAJcfykwMCNeTiZVhSswnCNFHdp2WbqZJweJcxk9IRxARE00OCcRlb8N");
 
 const TopUpPage = () => {
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -150,42 +50,16 @@ const TopUpPage = () => {
       return;
     }
 
-    // if (selectedMethod === "stripe") {
-    //   setShowStripeForm(true);
-    //   return;
-    // }
-
-    // try {
       setIsProcessing(true);
 
       const payload = { userId: user?._id, credit: amount };
       const res = await axiosSecure.patch("/top-up", payload);
 
-      // console.log(res.data.data.url);
 
       if(res.data.data.url) {
         console.log(res.data.data.url)
         window.location.href = res.data.data.url
       }
-      
-      // window.location.href = res.data.data.url
-    //   if (res.status === 200 || res.status === 201) {
-    //     toast.success(`🔥 You just bought ${amount} points!`, {
-    //       position: "top-right",
-    //     });
-
-    //     await refetchUser();
-    //   } else {
-    //     toast.error("Payment failed. Try again.");
-    //   }
-    // } catch (err) {
-    //   console.error(err);
-    //   toast.error(err.response?.data?.message || "Something went wrong 😬", {
-    //     position: "top-right",
-    //   });
-    // } finally {
-    //   setIsProcessing(false);
-    // }
   };
 
   const currentPoints = customAmount

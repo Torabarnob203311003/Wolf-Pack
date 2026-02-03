@@ -826,6 +826,6 @@ function CompetitionCards() {
       </div>
     </div>
   );
-}
+} 
 
 export default CompetitionCards;
