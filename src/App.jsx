@@ -24,6 +24,7 @@ import ForgetPassword from "./Pages/ForgetPassword/ForgetPassword";
 import VerifyOTP from "./Pages/VerifyOTP/VerifyOTP";
 import ResetPassword from "./Pages/ResetPassword/ResetPassword";
 import Success from "./Pages/Success/Success";
+import SponsorPage from "./Pages/Sponsor/Sponsor";
 
 function App() {
   return (
@@ -59,6 +60,17 @@ function App() {
               <PastWinners />
               <FacebookBanner />
               <About />
+              <Footer />
+            </>
+          }
+        />
+
+        <Route
+          path="/sponsor"
+          element={
+            <>
+              <Navbar />
+              <SponsorPage/>
               <Footer />
             </>
           }
