@@ -1,73 +1,8 @@
+import { useEffect, useState } from "react";
+import axiosSecure from "../../lib/axiosSecure";
 
 const SponsorPage = () => {
-  const sponsors = [
-    {
-      id: 1,
-      name: 'Tech Corp Solutions',
-      type: 'company',
-      category: 'platinum',
-      logo: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop',
-      description: 'Leading technology partner providing cutting-edge solutions for competitive gaming. We believe in empowering the next generation of esports professionals.',
-      website: 'https://techcorp.example.com',
-      sponsorSince: '2023',
-      contribution: 'Major Tournament Sponsor',
-    },
-    {
-      id: 2,
-      name: 'John "ProGamer" Smith',
-      type: 'individual',
-      category: 'gold',
-      logo: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop',
-      description: 'Professional esports athlete and community supporter. Dedicated to helping aspiring players achieve their dreams through mentorship and financial support.',
-      website: 'https://progamer.example.com',
-      sponsorSince: '2024',
-      contribution: 'Player Development Fund',
-    },
-    {
-      id: 3,
-      name: 'Gaming Gear Pro',
-      type: 'company',
-      category: 'platinum',
-      logo: 'https://images.unsplash.com/photo-1625948515291-69613efd103f?w=400&h=400&fit=crop',
-      description: 'Premium gaming equipment manufacturer. Our partnership ensures all players have access to world-class gaming peripherals and hardware.',
-      website: 'https://gaminggear.example.com',
-      sponsorSince: '2022',
-      contribution: 'Equipment & Hardware Partner',
-    },
-    {
-      id: 4,
-      name: 'Sarah "StreamQueen" Johnson',
-      type: 'individual',
-      category: 'silver',
-      logo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
-      description: 'Content creator and gaming influencer supporting grassroots esports. Passionate about creating opportunities for underrepresented players in competitive gaming.',
-      website: 'https://streamqueen.example.com',
-      sponsorSince: '2024',
-      contribution: 'Community Events Sponsor',
-    },
-    {
-      id: 5,
-      name: 'Energy Boost Drinks',
-      type: 'company',
-      category: 'gold',
-      logo: 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400&h=400&fit=crop',
-      description: 'Official energy drink partner fueling gamers worldwide. Committed to providing sustainable energy solutions for extended gaming sessions.',
-      website: 'https://energyboost.example.com',
-      sponsorSince: '2023',
-      contribution: 'Official Beverage Partner',
-    },
-    {
-      id: 6,
-      name: 'Digital Arena',
-      type: 'company',
-      category: 'silver',
-      logo: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=400&fit=crop',
-      description: 'State-of-the-art gaming venue and tournament host. Providing professional environments for competitive play and community gatherings.',
-      website: 'https://digitalarena.example.com',
-      sponsorSince: '2024',
-      contribution: 'Venue & Facilities Partner',
-    },
-  ];
+  const [sponsors, setSponsors] = useState([]);
 
   
 
@@ -84,6 +19,21 @@ const SponsorPage = () => {
         return 'bg-gray-700 text-white';
     }
   };
+
+  const fetchSponsors = async () =>{
+      try{
+        const response = await axiosSecure.get('/sponsor');
+        setSponsors(response.data.data);
+        console.log(response);
+        
+      }catch(err){
+        console.log(err);
+      }
+  }
+
+  useEffect(() => {
+    fetchSponsors();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white">
