@@ -3,7 +3,6 @@ import Layout from "./Components/shared/Layout";
 import CompetitionCards from "./Components/CompetitionCards/CompetitionCards";
 import CardDetails from "./Components/CompetitionCards/CardDetails";
 import PastWinners from "./Components/PastWinners/PastWinners";
-import About from "./Components/Common/About";
 import ScrollToTop from "./Components/ScrollToTop";
 import Navbar from "./Components/Navbar/Navbar";
 import FacebookBanner from "./Components/Facebookbanner/Facebookbanner";
