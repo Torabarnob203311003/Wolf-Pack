@@ -260,13 +260,11 @@ const PastCARDS = () => {
           </div>
           
           {/* Trustpilot Section */}
-          <div className="flex items-center justify-center space-x-4">
-            {/* Reviews Text */}
-            <div className="text-white text-sm">
+          {/* <div className="flex items-center justify-center space-x-4"> */}
+            {/* <div className="text-white text-sm">
               Reviews 2,006
             </div>
             
-            {/* Star Rating */}
             <div className="flex items-center space-x-1">
               <div className="w-6 h-6 bg-green-500 flex items-center justify-center">
                 <svg className="w-4 h-4 text-white fill-current" viewBox="0 0 20 20">
@@ -295,16 +293,14 @@ const PastCARDS = () => {
               </div>
             </div>
             
-            {/* Rating Number */}
             <div className="text-white text-sm font-bold">
               4.7
             </div>
             
-            {/* Trustpilot Logo/Text */}
             <div className="text-white text-sm">
               Trustpilot
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
         </div>
       </div>
 

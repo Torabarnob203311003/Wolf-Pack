@@ -38,7 +38,7 @@ function App() {
             element={
               <>
                 <CompetitionCards />
-                <About />
+                {/* <About /> */}
               </>
             }
           />
@@ -59,7 +59,7 @@ function App() {
               <Navbar />
               <PastWinners />
               <FacebookBanner />
-              <About />
+              {/* <About /> */}
               <Footer />
             </>
           }

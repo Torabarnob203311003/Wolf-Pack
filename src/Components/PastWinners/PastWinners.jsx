@@ -140,7 +140,7 @@ const PastWinners = () => {
           
           {/* Trustpilot Section */}
           <div className="flex items-center justify-center space-x-4">
-            <div className="text-white text-sm">
+            {/* <div className="text-white text-sm">
               Reviews 2,006
             </div>
             
@@ -152,10 +152,10 @@ const PastWinners = () => {
                   </svg>
                 </div>
               ))}
-            </div>
+            </div> */}
             
-            <div className="text-white text-sm font-bold">4.7</div>
-            <div className="text-white text-sm">Trustpilot</div>
+            {/* <div className="text-white text-sm font-bold">4.7</div>
+            <div className="text-white text-sm">Trustpilot</div> */}
           </div>
         </div>
       </div>

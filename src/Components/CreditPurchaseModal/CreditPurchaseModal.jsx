@@ -47,7 +47,6 @@ const CreditPurchaseModal = ({ isOpen, onClose, raffle, user, onSuccess }) => {
     try {
       setLoading(true);
 
-      // TODO: API IMPLEMENTATION
       const response = await axiosSecure.post('/ticket/buy-ticket-with-credits-coin', {
         userId: user._id,
         raffleId: raffle._id,

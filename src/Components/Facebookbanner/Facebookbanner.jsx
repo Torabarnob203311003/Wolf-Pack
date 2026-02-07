@@ -32,7 +32,7 @@ function FacebookBanner() {
             className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-medium font-bold mt-1 sm:mt-1.5"
             style={{ color: '#E28B27' }}
           >
-            Join our FB group – Over 40,000 members
+            Join our Facebook page 
           </div>
         </div>
       </div>
