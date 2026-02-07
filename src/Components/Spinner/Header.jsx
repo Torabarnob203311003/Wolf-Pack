@@ -6,7 +6,7 @@ const Header = ({ activeFilter, setActiveFilter, filterButtons, user }) => {
       </h1>
 
       {/* Trustpilot Rating */}
-      <div className="flex items-center justify-center gap-4 mb-8">
+      {/* <div className="flex items-center justify-center gap-4 mb-8">
         <div className="flex items-center gap-2">
           <div className="flex">
             {[...Array(5)].map((_, i) => (
@@ -16,7 +16,7 @@ const Header = ({ activeFilter, setActiveFilter, filterButtons, user }) => {
           <span className="bg-green-600 text-white text-sm px-2 py-1 rounded">4.7</span>
         </div>
         <span className="text-gray-300">Trustpilot • 2,006 Reviews</span>
-      </div>
+      </div> */}
 
       {/* Filter Buttons */}
       <div className="flex flex-wrap justify-center gap-3 mb-8">
