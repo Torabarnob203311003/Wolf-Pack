@@ -129,7 +129,7 @@ const PrizeModal = ({ prize, onClose }) => {
                 {/* Prize value badge (if applicable) */}
                 {prize.value && prizeType !== 'lose' && (
                   <div className={`inline-block px-6 py-3 rounded-full bg-gradient-to-r ${config.bgColor} text-white font-black text-lg md:text-xl animate-pulse border-2 ${config.borderColor}`}>
-                    +{prize.value}
+                    +{prizeType === 'lose'? '' : prize.value }
                   </div>
                 )}
               </div>
