@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo2 from '../../../src/assets/blacklogo.png';
-import { User, Trophy, Wallet, LogOut, ChevronDown, Coins, RefreshCcw } from 'lucide-react';
+import { User, Trophy, Wallet, LogOut, ChevronDown, Coins, RefreshCcw, History } from 'lucide-react';
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -172,7 +172,7 @@ function Navbar() {
                       <span className="text-sm text-white font-medium">Profile</span>
                     </button>
 
-                    {/* <button
+                   <button
                       onClick={() => {
                         navigate('/spinning-history');
                         setIsDropdownOpen(false);
@@ -181,7 +181,8 @@ function Navbar() {
                     >
                       <History className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors" />
                       <span className="text-sm text-gray-300 group-hover:text-white">Spinning History</span>
-                    </button> */}
+                    </button>
+
 
                     <button
                       onClick={() => {
