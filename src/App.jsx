@@ -39,7 +39,7 @@ function App() {
               <>
                 <CompetitionCards />
                 {/* <About /> */}
-                <TrustpilotSection/>
+                <TrustpilotSection />
               </>
             }
           />
@@ -48,6 +48,7 @@ function App() {
             element={
               <>
                 <CardDetails />
+                <TrustpilotSection />
               </>
             }
           />
@@ -61,6 +62,7 @@ function App() {
               <PastWinners />
               <FacebookBanner />
               {/* <About /> */}
+              <TrustpilotSection />
               <Footer />
             </>
           }
@@ -72,6 +74,7 @@ function App() {
             <>
               <Navbar />
               <SponsorPage />
+              <TrustpilotSection />
               <Footer />
             </>
           }
@@ -94,6 +97,7 @@ function App() {
             <>
               <Navbar />
               <Terms />
+              <TrustpilotSection />
               <Footer />
             </>
           }

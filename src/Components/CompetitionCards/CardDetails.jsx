@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import FacebookBanner from '../Facebookbanner/Facebookbanner';
-import About from '../Common/About';
-import { useParams } from 'react-router-dom';
-import axiosSecure from '../../lib/axiosSecure';
-import TicketPurchaseSection from '../TicketPurchase/TicketPurchase';
-import htmlReactParser from 'html-react-parser';
-import { Coins } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import CreditPurchaseModal from '../CreditPurchaseModal/CreditPurchaseModal';
+import { useEffect, useState } from "react";
+import FacebookBanner from "../Facebookbanner/Facebookbanner";
+import About from "../Common/About";
+import { useParams } from "react-router-dom";
+import axiosSecure from "../../lib/axiosSecure";
+import TicketPurchaseSection from "../TicketPurchase/TicketPurchase";
+import htmlReactParser from "html-react-parser";
+import { Coins } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import CreditPurchaseModal from "../CreditPurchaseModal/CreditPurchaseModal";
 
 const CardDetails = () => {
   const params = useParams();
@@ -19,27 +19,27 @@ const CardDetails = () => {
 
   useEffect(() => {
     axiosSecure(`/raffles/get-single-raffle/${params.id}`)
-      .then(response => {
+      .then((response) => {
         if (response.data.success && response.data.data) {
           setRaffle(response.data.data);
         }
         setLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
-        setError('Failed to load raffle details');
+        setError("Failed to load raffle details");
         setLoading(false);
       });
-  }, [params.id])
+  }, [params.id]);
 
   if (loading) {
     return (
       <div>
         <div className="flex justify-center items-center min-h-screen">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
         </div>
         <FacebookBanner />
-        <About />
+        {/* <About /> */}
       </div>
     );
   }
@@ -50,10 +50,10 @@ const CardDetails = () => {
     return (
       <div>
         <div className="flex justify-center items-center min-h-screen">
-          <p className="text-red-500 text-lg">{error || 'Raffle not found'}</p>
+          <p className="text-red-500 text-lg">{error || "Raffle not found"}</p>
         </div>
         <FacebookBanner />
-        <About />
+        {/* <About /> */}
       </div>
     );
   }
@@ -65,22 +65,26 @@ const CardDetails = () => {
       <div className="flex justify-center items-center min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="bg-[#282727] rounded-xl overflow-hidden shadow-2xl max-w-6xl w-full border border-gray-700">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 relative">
-
             {/* Left Section: Raffle Image */}
             <div className="relative">
               <img
                 src={raffle.thumbnail}
                 alt={raffle.title}
                 className="w-full h-full object-cover lg:rounded-l-xl rounded-t-xl lg:rounded-tr-none"
-                style={{ minHeight: '300px', maxHeight: '600px' }}
+                style={{ minHeight: "300px", maxHeight: "600px" }}
               />
             </div>
 
             {/* Right Section: Details and Price */}
             <div className="p-6 sm:p-8 lg:p-10 text-white relative flex flex-col justify-between lg:rounded-r-xl rounded-b-xl lg:rounded-bl-none">
-              <div className="flex-grow pr-4 lg:pr-6 custom-scrollbar" style={{ maxHeight: '450px', overflowY: 'auto' }}>
+              <div
+                className="flex-grow pr-4 lg:pr-6 custom-scrollbar"
+                style={{ maxHeight: "450px", overflowY: "auto" }}
+              >
                 <h2 className="text-3xl font-bold mb-2">{raffle.title}</h2>
-                <p className="text-sm text-gray-400 mb-4">£{raffle.price} per entry</p>
+                <p className="text-sm text-gray-400 mb-4">
+                  £{raffle.price} per entry
+                </p>
 
                 {/* User Credit Display */}
                 {user && (
@@ -88,9 +92,13 @@ const CardDetails = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Coins className="text-yellow-500" size={20} />
-                        <span className="text-gray-400 text-sm">Your Credits:</span>
+                        <span className="text-gray-400 text-sm">
+                          Your Credits:
+                        </span>
                       </div>
-                      <span className="text-yellow-500 text-xl font-bold">{user.credit || 0}</span>
+                      <span className="text-yellow-500 text-xl font-bold">
+                        {user.credit || 0}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -119,19 +127,28 @@ const CardDetails = () => {
                 </div>
 
                 <p className="text-lg font-semibold mb-2">{raffle.title}</p>
-                <p className="text-gray-300 mb-4">{htmlReactParser(raffle.details)}</p>
+                <p className="text-gray-300 mb-4">
+                  {htmlReactParser(raffle.details)}
+                </p>
 
                 {/* Raffle Details */}
-                <p className="text-md font-semibold text-yellow-500 mb-2">Raffle Information</p>
+                <p className="text-md font-semibold text-yellow-500 mb-2">
+                  Raffle Information
+                </p>
                 <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1 mb-6">
-                  <li>Total Tickets Available: {raffle.totalTicket.toLocaleString()}</li>
+                  <li>
+                    Total Tickets Available:{" "}
+                    {raffle.totalTicket.toLocaleString()}
+                  </li>
                   <li>Price Per Entry: £{raffle.price}</li>
                   <li>Max Tickets Per User: {raffle.perUserTicketLimit}</li>
-                  <li>Status: {raffle.status ? 'Active' : 'Inactive'}</li>
+                  <li>Status: {raffle.status ? "Active" : "Inactive"}</li>
                 </ul>
 
                 {/* Prize Details */}
-                <p className="text-md font-semibold text-yellow-500 mb-2">Prize Details</p>
+                <p className="text-md font-semibold text-yellow-500 mb-2">
+                  Prize Details
+                </p>
                 <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1 mb-6">
                   <li>Exclusive prize opportunity</li>
                   <li>One lucky winner will be selected</li>
@@ -149,7 +166,8 @@ const CardDetails = () => {
                 className="absolute left-0 h-full rounded-full transition-all duration-500 ease-in-out"
                 style={{
                   width: `${progressPercentage}%`,
-                  background: 'linear-gradient(90deg, #FFFFFF 0%, #E28B27 100%)'
+                  background:
+                    "linear-gradient(90deg, #FFFFFF 0%, #E28B27 100%)",
                 }}
               ></div>
 
@@ -160,11 +178,15 @@ const CardDetails = () => {
 
             <div className="flex justify-between items-center text-sm font-semibold mt-4 px-2">
               <div className="text-left">
-                <span className="text-yellow-500 text-lg sm:text-xl font-bold">{raffle.ticketSold}</span>
+                <span className="text-yellow-500 text-lg sm:text-xl font-bold">
+                  {raffle.ticketSold}
+                </span>
                 <p className="text-gray-400">Tickets sold</p>
               </div>
               <div className="text-right">
-                <span className="text-yellow-500 text-lg sm:text-xl font-bold">{ticketsAvailable.toLocaleString()}</span>
+                <span className="text-yellow-500 text-lg sm:text-xl font-bold">
+                  {ticketsAvailable.toLocaleString()}
+                </span>
                 <p className="text-gray-400">Ticket available</p>
               </div>
             </div>
@@ -180,7 +202,7 @@ const CardDetails = () => {
         raffle={raffle}
       />
 
-      <About />
+      {/* <About /> */}
 
       {/* Credit Purchase Modal */}
       <CreditPurchaseModal

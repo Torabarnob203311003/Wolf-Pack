@@ -3,7 +3,7 @@ import React from 'react';
 function FacebookBanner() {
   return (
     <div 
-      className="w-full max-w-7xl mx-auto mt-8 sm:mt-12 md:mt-16 px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 md:gap-6 rounded-xl sm:rounded-2xl mx-3 sm:mx-4 md:mx-auto"
+      className="w-full max-w-7xl mx-auto my-8 sm:my-12 md:my-16 px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 md:gap-6 rounded-xl sm:rounded-2xl sm:mx-4 md:mx-auto"
       style={{
         background: '#FDED43'
       }}
