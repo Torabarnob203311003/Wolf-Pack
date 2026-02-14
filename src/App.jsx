@@ -24,6 +24,7 @@ import VerifyOTP from "./Pages/VerifyOTP/VerifyOTP";
 import ResetPassword from "./Pages/ResetPassword/ResetPassword";
 import Success from "./Pages/Success/Success";
 import SponsorPage from "./Pages/Sponsor/Sponsor";
+import TrustpilotSection from "./Components/TrustPilotSection/TrustPilotSection";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
               <>
                 <CompetitionCards />
                 {/* <About /> */}
+                <TrustpilotSection/>
               </>
             }
           />
@@ -69,65 +71,67 @@ function App() {
           element={
             <>
               <Navbar />
-              <SponsorPage/>
+              <SponsorPage />
               <Footer />
             </>
           }
         />
 
-        <Route 
-          path="/about-us" 
+        <Route
+          path="/about-us"
           element={
             <>
-              <Navbar/>
-              <AboutUs/>
-              <Footer/>
+              <Navbar />
+              <AboutUs />
+              <Footer />
             </>
-          }  
+          }
         />
 
-        <Route 
-          path="/terms-and-conditions" 
+        <Route
+          path="/terms-and-conditions"
           element={
             <>
-              <Navbar/>
+              <Navbar />
               <Terms />
-              <Footer/>
+              <Footer />
             </>
-          }  
+          }
         />
 
-        <Route 
-          path="/privacy-policy" 
+        <Route
+          path="/privacy-policy"
           element={
             <>
-              <Navbar/>
+              <Navbar />
               <Privacy />
-              <Footer/>
+              <Footer />
             </>
-          }  
+          }
         />
 
-        <Route 
-          path="/cookie-policy" 
+        <Route
+          path="/cookie-policy"
           element={
             <>
-              <Navbar/>
+              <Navbar />
               <CookiePolicy />
-              <Footer/>
+              <Footer />
             </>
-          }  
+          }
         />
 
         {/* Protected Routes */}
         <Route element={<PrivateRoute />}>
-          <Route path='/profile' element={
-            <>
-              <Navbar />
-              <Profile />
-              <Footer />
-            </>
-          }
+          <Route
+            path="/profile"
+            element={
+              <>
+                <Navbar />
+                <Profile />
+                <Footer />
+              </>
+            }
           />
           <Route
             path="/spinning-history"
@@ -182,16 +186,14 @@ function App() {
               </>
             }
           />
-
         </Route>
-          
-  
+
         {/* ✅ Auth Routes */}
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/forgot-password" element={<ForgetPassword/>}/>
-        <Route path="/verify-otp" element={<VerifyOTP/>} />
-        <Route path="/reset-password" element={<ResetPassword/>} />
+        <Route path="/forgot-password" element={<ForgetPassword />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

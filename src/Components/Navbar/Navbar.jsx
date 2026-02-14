@@ -466,6 +466,19 @@ function Navbar() {
 
                 <button
                   onClick={() => {
+                    navigate("/swap-reward");
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-4 py-2.5 bg-gray-900/50 hover:bg-gray-800/50 rounded-lg transition-colors text-left border border-gray-800"
+                >
+                  <History className="w-5 h-5 text-yellow-500" />
+                  <span className="text-sm text-white font-medium">
+                    Swap & Withdraw Reward
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
                     navigate("/raffle-history");
                     setIsMenuOpen(false);
                   }}
