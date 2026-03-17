@@ -5,6 +5,7 @@ import Header from "../Spinner/Header";
 import SpinWheel from "../Spinner/SpinWheel";
 import RaffleCard from "../Spinner/RaffleCard";
 import Pagination from "../Spinner/Pagination";
+import MineGame from "../MineGame/MineGame";
 
 
 const CARDS_PER_PAGE = 12;
@@ -20,6 +21,7 @@ function CompetitionCards() {
 
   const filterButtons = [
     { id: 'prize', label: 'PRIZE' },
+    { id: 'mine', label: 'MINE GAME' },
   ];
 
   const fetchRaffles = async () => {
@@ -159,6 +161,10 @@ function CompetitionCards() {
             <p className="text-gray-400 text-xl">No competitions available at the moment.</p>
           </div>
         )}
+
+        {activeFilter === "mine" && (<div>
+         <MineGame/>
+        </div>)}
       </div>
     </div>
   );

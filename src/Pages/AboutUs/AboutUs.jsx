@@ -1,5 +1,5 @@
-import React from 'react';
 import { Trophy, Shield, Heart, Award, Sparkles, Target, Users, CheckCircle } from 'lucide-react';
+import MinesGame from '../../Components/MineGame/MineGame';
 
 const AboutUs = () => {
   const features = [
@@ -184,6 +184,7 @@ const AboutUs = () => {
           </p>
         </div>
       </div>
+      <MinesGame/>
     </div>
   );
 };

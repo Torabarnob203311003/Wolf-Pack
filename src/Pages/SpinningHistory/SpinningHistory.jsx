@@ -55,8 +55,6 @@ const SpinningHistoryPage = () => {
     }
   }, [spinnerHistory, selectedFilter]);
 
-  // Stats
-
 
   // Reward badge color
   const getPrizeBadgeColor = (reward) => {
