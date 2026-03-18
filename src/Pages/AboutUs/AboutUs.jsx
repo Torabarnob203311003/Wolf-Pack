@@ -184,7 +184,6 @@ const AboutUs = () => {
           </p>
         </div>
       </div>
-      <MinesGame/>
     </div>
   );
 };
