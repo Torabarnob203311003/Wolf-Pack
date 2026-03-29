@@ -344,9 +344,11 @@ function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown - FIXED: Scrollable and shows sign out */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${isMenuOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}
+        className={`md:hidden overflow-y-auto transition-all duration-300 ${
+          isMenuOpen ? "max-h-[90vh] opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
         <div className="px-4 py-4 space-y-4 border-t border-gray-800 mt-3">
           {/* Mobile User Info */}
@@ -434,7 +436,7 @@ function Navbar() {
             </Link>
           </nav>
 
-          {/* Mobile Auth/User Menu */}
+          {/* Mobile Auth/User Menu - REMOVED overflow-y-auto and max-h */}
           <div className="flex flex-col space-y-2 pt-4 border-t border-gray-800">
             {user && isAuthenticated ? (
               <>

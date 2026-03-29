@@ -34,6 +34,18 @@ const Header = ({ activeFilter, setActiveFilter, filterButtons, user }) => {
           </button>
         )}
 
+        {/* {user && (
+          <button
+            onClick={() => setActiveFilter('mine')}
+            className={`px-6 py-2 rounded-full font-bold transition-all duration-200 ${
+              activeFilter === 'spin'
+                ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white'
+                : 'bg-gray-800 text-yellow-400 border border-yellow-400 hover:bg-yellow-900/20'
+            }`}
+          >
+            Mine
+          </button>
+        )} */}
         
       </div>
     </div>

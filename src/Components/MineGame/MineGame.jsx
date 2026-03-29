@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 
 // ─── SOUND ENGINE ────────────────────────────────────────────────────────────
 function createAudioCtx() {
@@ -267,6 +268,9 @@ export default function MineGame() {
   const profit = +(payout - bet).toFixed(2);
 
   function startGame() {
+
+    if (betInput < 40) return toast.error("Minimum bet is  £40.");
+
     const b = Math.max(0, parseFloat(betInput) || 0);
     if (b <= 0 || b > balance) return;
     setBet(b);

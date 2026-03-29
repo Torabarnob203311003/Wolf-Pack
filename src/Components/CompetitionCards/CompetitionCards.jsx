@@ -77,10 +77,6 @@ function CompetitionCards() {
     }
   };
 
-
-
-
-
   useEffect(() => {
     fetchRaffles();
     fetchSpinner();
