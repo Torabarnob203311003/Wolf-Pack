@@ -9,6 +9,14 @@ import MineGame from "../MineGame/MineGame";
 
 
 const CARDS_PER_PAGE = 12;
+const ALLOWED_EMAILS = [
+  'allendodul6@gmail.com',
+  'zxrcrazy@gmail.com',
+  'franny.c20@googlemail.com',
+  'khendleman@gmail.com',
+  'robkelly3234@icloud.com',
+];
+
 
 function CompetitionCards() {
   const [activeFilter, setActiveFilter] = useState('prize');
@@ -19,10 +27,20 @@ function CompetitionCards() {
   const [segments, setSegments] = useState([]);
   const { user, refetchUser } = useAuth();
 
-  const filterButtons = [
-    { id: 'prize', label: 'PRIZE' },
-    // { id: 'mine', label: 'MINE GAME' },
-  ];
+  const canAccessMine = user && ALLOWED_EMAILS.includes(user.email);
+
+
+  // Build filter buttons dynamically
+  const getFilterButtons = () => {
+    const buttons = [{ id: 'prize', label: 'PRIZE' }];
+    if (canAccessMine) {
+      buttons.push({ id: 'mine', label: 'MINE GAME' });
+    }
+    return buttons;
+  };
+  
+  const filterButtons = getFilterButtons();
+
 
   const fetchRaffles = async () => {
     try {
@@ -81,6 +99,12 @@ function CompetitionCards() {
     fetchRaffles();
     fetchSpinner();
   }, []);
+
+  useEffect(() => {
+    if (activeFilter === 'mine' && !canAccessMine) {
+      setActiveFilter('prize');
+    }
+  }, [canAccessMine, activeFilter]);
 
   const handleSpinComplete = () => {
     refetchUser();

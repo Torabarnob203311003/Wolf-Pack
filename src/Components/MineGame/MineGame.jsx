@@ -65,6 +65,7 @@ function playClickSound(ctx) {
 // ─── MATH ────────────────────────────────────────────────────────────────────
 const HOUSE_EDGE = 0.08;
 const TOTAL = 25;
+const TIMER_DURATION = 10; // seconds
 
 function calcMult(rev, bombs) {
   let m = 1; const gems = TOTAL - bombs;
@@ -74,6 +75,54 @@ function calcMult(rev, bombs) {
     m *= (rem / sr) * (1 - HOUSE_EDGE);
   }
   return Math.max(1, m);
+}
+
+// ─── TIMER RING ───────────────────────────────────────────────────────────────
+function TimerRing({ timeLeft, total = TIMER_DURATION }) {
+  const r = 22;
+  const circ = 2 * Math.PI * r;
+  const progress = timeLeft / total;
+  const dashOffset = circ * (1 - progress);
+  const isUrgent = timeLeft <= 3;
+  const color = isUrgent ? "#ef4444" : timeLeft <= 6 ? "#f59e0b" : "#22c55e";
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+      <svg width={56} height={56} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={28} cy={28} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={4} />
+        <circle
+          cx={28} cy={28} r={r} fill="none"
+          stroke={color} strokeWidth={4}
+          strokeDasharray={circ}
+          strokeDashoffset={dashOffset}
+          strokeLinecap="round"
+          style={{ transition: "stroke-dashoffset 0.9s linear, stroke 0.3s ease" }}
+        />
+        <text
+          x={28} y={28}
+          textAnchor="middle" dominantBaseline="central"
+          fill={color}
+          fontSize={isUrgent ? 15 : 13}
+          fontWeight={700}
+          fontFamily="'Orbitron',monospace"
+          style={{ transform: "rotate(90deg)", transformOrigin: "28px 28px", transition: "font-size 0.15s" }}
+        >
+          {timeLeft}
+        </text>
+      </svg>
+      <span style={{
+        color: color,
+        fontSize: 11,
+        fontFamily: "'Rajdhani',sans-serif",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        animation: isUrgent ? "pulse 0.6s ease-in-out infinite alternate" : "none",
+      }}>
+        {isUrgent ? "Hurry!" : "Time left"}
+      </span>
+    </div>
+  );
 }
 
 // ─── SVGS ────────────────────────────────────────────────────────────────────
@@ -217,30 +266,10 @@ const S = {
   raj: { fontFamily: "'Rajdhani',sans-serif" },
 };
 
-// ─── AXIOS TOKEN INTERCEPTOR SETUP ───────────────────────────────────────────
-// Attach the accessToken from localStorage to every request
-// axiosSecure.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("accessToken");
-//     console.log(token);
-    
-//     if (token) {
-//       config.headers["Authorization"] = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
-
 axiosSecure.interceptors.request.use(
   (config) => {
-    // Read from cookie, not localStorage
-    const token = document.cookie
-      .split("; ")
-      .find(row => row.startsWith("accessToken="))
-      ?.split("=")[1];
-      console.log(token);
-    
+    const token = localStorage.getItem('token');
+    console.log('Attaching token to request:', token);
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -264,6 +293,9 @@ export default function MineGame() {
   const [muted, setMuted] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ─── Timer state ──────────────────────────────────────────────────────────
+  const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
+
   // ─── Backend state ────────────────────────────────────────────────────────
   const [gameId, setGameId] = useState(null);
   const [serverMult, setServerMult] = useState(1);
@@ -273,13 +305,95 @@ export default function MineGame() {
 
   const audioCtx = useRef(null);
   const mutedRef = useRef(false);
+  // Keep a ref to revealed so the timer callback can read current value
+  const revealedRef = useRef(0);
+  const payoutRef = useRef(0);
+  const gameRef = useRef("idle");
+
   useEffect(() => { mutedRef.current = muted; }, [muted]);
+  useEffect(() => { revealedRef.current = revealed; }, [revealed]);
+  useEffect(() => { gameRef.current = game; }, [game]);
 
   function getCtx() {
     if (!audioCtx.current) audioCtx.current = createAudioCtx();
     if (audioCtx.current?.state === "suspended") audioCtx.current.resume();
     return mutedRef.current ? null : audioCtx.current;
   }
+
+  function playTickSound(ctx) {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.connect(g); g.connect(ctx.destination);
+  osc.type = "sine"; osc.frequency.value = 660;
+  g.gain.setValueAtTime(0.09, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  osc.start(t); osc.stop(t + 0.08);
+}
+
+function playUrgentTickSound(ctx) {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  // Sharp high beep
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.connect(g); g.connect(ctx.destination);
+  osc.type = "square"; osc.frequency.value = 880;
+  g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  osc.start(t); osc.stop(t + 0.1);
+  // Low thud underneath
+  const osc2 = ctx.createOscillator(), g2 = ctx.createGain();
+  osc2.connect(g2); g2.connect(ctx.destination);
+  osc2.type = "sine"; osc2.frequency.setValueAtTime(180, t);
+  osc2.frequency.exponentialRampToValueAtTime(80, t + 0.12);
+  g2.gain.setValueAtTime(0.18, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  osc2.start(t); osc2.stop(t + 0.12);
+}
+
+  // ─── TIMER EFFECT ─────────────────────────────────────────────────────────
+ useEffect(() => {
+  if (game !== "playing") return;
+  setTimeLeft(TIMER_DURATION);
+
+  const interval = setInterval(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        if (revealedRef.current > 0) {
+          setBoard(b => b.map(s => s === "gem" ? "gem-safe" : s));
+          setGame("won");
+          setBalance(p => +(p + payoutRef.current).toFixed(2));
+          playCashoutSound(mutedRef.current ? null : audioCtx.current);
+        } else {
+          setGame("lost");
+          playBombSound(mutedRef.current ? null : audioCtx.current);
+        }
+        return 0;
+      }
+
+      // 🔔 Play tick sound on every countdown step
+      const ctx = mutedRef.current ? null : audioCtx.current;
+      if (prev <= 4) {
+        // Final 3 seconds — urgent double-beep
+        playUrgentTickSound(ctx);
+      } else {
+        // Normal tick
+        playTickSound(ctx);
+      }
+
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [game]);
+
+  // Keep payoutRef in sync so timer can access it
+  const activeMines = game === "idle" ? mines : serverMines;
+  const activeGems = game === "idle" ? TOTAL - mines : serverGems;
+  const mult = game === "playing" || game === "won" ? serverMult : calcMult(revealed, mines);
+  const payout = game === "playing" || game === "won" ? serverPayout : +(bet * mult).toFixed(2);
+  const profit = +(payout - bet).toFixed(2);
+
+  useEffect(() => { payoutRef.current = payout; }, [payout]);
 
   // ── Icon size calculation ──
   const outerPad = isMobile ? 10 : 16;
@@ -289,13 +403,6 @@ export default function MineGame() {
   const tileGap = Math.max(4, Math.min(7, Math.round(gridW * 0.018)));
   const tileW = Math.floor((gridW - tileGap * 4) / 5);
   const iconSize = Math.max(10, Math.round(tileW * 0.40));
-
-  // Use server values when in game, otherwise use local calc for preview
-  const activeMines = game === "idle" ? mines : serverMines;
-  const activeGems = game === "idle" ? TOTAL - mines : serverGems;
-  const mult = game === "playing" || game === "won" ? serverMult : calcMult(revealed, mines);
-  const payout = game === "playing" || game === "won" ? serverPayout : +(bet * mult).toFixed(2);
-  const profit = +(payout - bet).toFixed(2);
 
   // ─── START GAME (API) ─────────────────────────────────────────────────────
   async function startGame() {
@@ -319,9 +426,9 @@ export default function MineGame() {
         setServerPayout(d.currentPayout);
         setServerMines(d.mines);
         setServerGems(d.gems);
-        setBoard(d.board); // all "hidden" from server
+        setBoard(d.board);
         setRevealed(d.revealed);
-        setGame("playing");
+        setGame("playing"); // ← triggers timer reset via useEffect
         setBalance(p => +(p - d.bet).toFixed(2));
         playClickSound(getCtx());
       } else {
@@ -354,12 +461,8 @@ export default function MineGame() {
         const nb = [...board];
 
         if (d.result === "lost") {
-          // Server reveals bomb positions — update board with mine locations
-          // The server board may contain revealed info; reflect it
           if (d.board) {
-            d.board.forEach((cell, i) => {
-              nb[i] = cell; // use full server board on loss
-            });
+            d.board.forEach((cell, i) => { nb[i] = cell; });
           } else {
             nb[idx] = "mine";
           }
@@ -375,9 +478,10 @@ export default function MineGame() {
           playCashoutSound(getCtx());
 
         } else {
-          // pending — safe tile revealed
           nb[idx] = "gem";
           setBoard(nb);
+          // Reset timer on each successful reveal
+          // setTimeLeft(TIMER_DURATION);
           playDiamondSound(getCtx());
         }
       } else {
@@ -385,7 +489,6 @@ export default function MineGame() {
       }
     } catch (err) {
       console.log(err);
-      
       toast.error(err?.response?.data?.message || "Server error. Please try again.");
     } finally {
       setLoading(false);
@@ -401,8 +504,6 @@ export default function MineGame() {
   }
 
   // ─── CASH OUT ─────────────────────────────────────────────────────────────
-  // Note: implement /mine/cashout endpoint call here if your backend has it.
-  // For now this does a client-side cashout since no cashout API was provided.
   function cashOut() {
     if (game !== "playing" || revealed === 0 || loading) return;
     setBoard(b => b.map(s => s === "gem" ? "gem-safe" : s));
@@ -419,6 +520,7 @@ export default function MineGame() {
     setGameId(null);
     setServerMult(1);
     setServerPayout(0);
+    setTimeLeft(TIMER_DURATION);
   }
 
   const halfBet = () => setBetInput(v => Math.max(0, parseFloat(v) / 2).toFixed(2));
@@ -431,7 +533,7 @@ export default function MineGame() {
     <div style={S.card}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
         <span style={S.label}>Bet Amount</span>
-        <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, fontWeight: 700 }}>₹{balance.toFixed(2)}</span>
+        <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, fontWeight: 700 }}>£{balance.toFixed(2)}</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#0d1220", borderRadius: 8, padding: "8px 10px", border: "1px solid rgba(255,255,255,0.07)" }}>
         <input
@@ -475,13 +577,41 @@ export default function MineGame() {
     <div style={S.card}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 2 }}>
         <span style={S.label}>Profit ({mult.toFixed(2)}x)</span>
-        <span style={{ color: "#F5D334", fontSize: 11, fontWeight: 700 }}>₹{profit.toFixed(2)}</span>
+        <span style={{ color: "#F5D334", fontSize: 11, fontWeight: 700 }}>£{profit.toFixed(2)}</span>
       </div>
       <div style={{ background: "rgba(245,211,52,0.06)", border: "1px solid rgba(245,211,52,0.25)", borderRadius: 8, padding: "7px 10px", ...S.orb, fontSize: 15, fontWeight: 700, color: "#F5D334" }}>
         {profit.toFixed(2)}
       </div>
     </div>
   );
+
+  // ─── TIMER CARD ───────────────────────────────────────────────────────────
+  const TimerCard = game === "playing" ? (
+    <div style={{
+      ...S.card,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "10px 14px",
+      border: timeLeft <= 3
+        ? "1px solid rgba(239,68,68,0.45)"
+        : timeLeft <= 6
+          ? "1px solid rgba(245,158,11,0.35)"
+          : "1px solid rgba(34,197,94,0.25)",
+      background: timeLeft <= 3
+        ? "rgba(239,68,68,0.06)"
+        : "#151d30",
+      transition: "border-color 0.3s, background 0.3s",
+    }}>
+      <div>
+        <div style={{ ...S.label, marginBottom: 3 }}>Auto {revealed > 0 ? "cashout" : "end"} in</div>
+        <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, ...S.raj }}>
+          {revealed > 0 ? "Will cashout your gems" : "No gems — round ends"}
+        </div>
+      </div>
+      <TimerRing timeLeft={timeLeft} total={TIMER_DURATION} />
+    </div>
+  ) : null;
 
   const ActionButtons = (
     <>
@@ -496,7 +626,7 @@ export default function MineGame() {
         </button>
       ) : (
         <button onClick={cashOut} disabled={revealed === 0 || loading} style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: revealed > 0 && !loading ? "2px solid #F5D334" : "1px solid rgba(255,255,255,0.08)", background: revealed > 0 && !loading ? "linear-gradient(90deg,#C78800,#F5D334)" : "rgba(255,255,255,0.03)", color: revealed > 0 && !loading ? "black" : "rgba(255,255,255,0.25)", ...S.orb, fontWeight: 900, fontSize: 12, letterSpacing: "0.1em", cursor: revealed > 0 && !loading ? "pointer" : "default" }}>
-          {loading ? "Processing..." : `Cashout ₹${payout.toFixed(2)}`}
+          {loading ? "Processing..." : `Cashout £${payout.toFixed(2)}`}
         </button>
       )}
       <button onClick={() => setMuted(m => !m)} style={{ width: "100%", padding: "7px 0", borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.28)", cursor: "pointer", ...S.raj, fontWeight: 600, fontSize: 13 }}>
@@ -515,11 +645,11 @@ export default function MineGame() {
 
   const Banner = game === "won" ? (
     <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "rgba(245,211,52,0.08)", border: "1px solid rgba(245,211,52,0.25)", color: "#F5D334", fontSize: isMobile ? 12 : 14, ...S.raj, fontWeight: 600 }}>
-      💎 CASHED OUT · ₹{payout.toFixed(2)} · {mult.toFixed(3)}×
+      💎 CASHED OUT · £{payout.toFixed(2)} · {mult.toFixed(3)}×
     </div>
   ) : game === "lost" ? (
     <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.3)", color: "#f87171", fontSize: isMobile ? 12 : 14, ...S.raj, fontWeight: 600 }}>
-      💣 BOOM · -₹{bet.toFixed(2)}
+      💣 BOOM · -£{bet.toFixed(2)}
     </div>
   ) : null;
 
@@ -537,13 +667,13 @@ export default function MineGame() {
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap');
         @keyframes gemPop { 0%{transform:scale(0.4) rotate(-15deg);opacity:0} 65%{transform:scale(1.25) rotate(6deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
         @keyframes mineExplode { 0%{transform:scale(0.2);opacity:0} 55%{transform:scale(1.4)} 100%{transform:scale(1)} }
+        @keyframes pulse { from{opacity:1} to{opacity:0.5} }
         * { box-sizing: border-box; }
         input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
         input[type=range]{-webkit-appearance:none;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);outline:none;width:100%;}
         input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#22c55e;cursor:pointer;box-shadow:0 0 6px rgba(34,197,94,0.5);}
       `}</style>
 
-      {/* ── Outer wrapper ── */}
       <div style={{
         width: "100%",
         maxWidth: 860,
@@ -553,11 +683,11 @@ export default function MineGame() {
       }}>
 
         {isMobile ? (
-          // ──────────── MOBILE LAYOUT ────────────
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <h1 style={{ ...S.orb, fontWeight: 900, fontSize: 18, color: "#F5D334", letterSpacing: "0.15em", margin: 0 }}>MINES</h1>
             {TileGrid}
             {Banner}
+            {TimerCard}
             {BetCard}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {MinesGemsCard}
@@ -569,13 +699,13 @@ export default function MineGame() {
           </div>
 
         ) : (
-          // ──────────── DESKTOP LAYOUT ────────────
           <div style={{ display: "flex", flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
             {/* Left */}
             <div style={{ width: 210, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {BetCard}
               {MinesGemsCard}
               {ProfitCard}
+              {TimerCard}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {ActionButtons}
               </div>

@@ -13,6 +13,7 @@ import {
   History,
 } from "lucide-react";
 
+
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
