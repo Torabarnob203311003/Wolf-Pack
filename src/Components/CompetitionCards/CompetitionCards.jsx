@@ -21,13 +21,13 @@ function CompetitionCards() {
 
   const filterButtons = [
     { id: 'prize', label: 'PRIZE' },
-    { id: 'mine', label: 'MINE GAME' },
+    // { id: 'mine', label: 'MINE GAME' },
   ];
 
   const fetchRaffles = async () => {
     try {
       setLoading(true);
-      const response = await axiosSecure('/raffles/get-all-raffle');
+      const response = await axiosSecure('/raffles/get-active-raffle');
       const data = response.data;
 
       if (data.success && data.data) {

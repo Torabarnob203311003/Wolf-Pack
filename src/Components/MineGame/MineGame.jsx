@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import axiosSecure from "../../lib/axiosSecure";
 
 // ─── SOUND ENGINE ────────────────────────────────────────────────────────────
 function createAudioCtx() {
@@ -73,15 +74,6 @@ function calcMult(rev, bombs) {
     m *= (rem / sr) * (1 - HOUSE_EDGE);
   }
   return Math.max(1, m);
-}
-function genBoard(bombs) {
-  const a = Array(TOTAL).fill("gem");
-  let n = 0;
-  while (n < bombs) {
-    const i = Math.floor(Math.random() * TOTAL);
-    if (a[i] !== "mine") { a[i] = "mine"; n++; }
-  }
-  return a;
 }
 
 // ─── SVGS ────────────────────────────────────────────────────────────────────
@@ -225,22 +217,60 @@ const S = {
   raj: { fontFamily: "'Rajdhani',sans-serif" },
 };
 
+// ─── AXIOS TOKEN INTERCEPTOR SETUP ───────────────────────────────────────────
+// Attach the accessToken from localStorage to every request
+// axiosSecure.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem("accessToken");
+//     console.log(token);
+    
+//     if (token) {
+//       config.headers["Authorization"] = `Bearer ${token}`;
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+axiosSecure.interceptors.request.use(
+  (config) => {
+    // Read from cookie, not localStorage
+    const token = document.cookie
+      .split("; ")
+      .find(row => row.startsWith("accessToken="))
+      ?.split("=")[1];
+      console.log(token);
+    
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 export default function MineGame() {
   const winW = useWindowWidth();
-  // True mobile breakpoint: anything under 600px
   const isMobile = winW < 600;
 
   const [balance, setBalance] = useState(1000);
   const [betInput, setBetInput] = useState("0.00");
   const [bet, setBet] = useState(0);
-  const [mines, setMines] = useState(3);
+  const [mines, setMines] = useState(7);
   const [board, setBoard] = useState(Array(TOTAL).fill("hidden"));
   const [game, setGame] = useState("idle");
   const [revealed, setRevealed] = useState(0);
   const [muted, setMuted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const boardData = useRef([]);
+  // ─── Backend state ────────────────────────────────────────────────────────
+  const [gameId, setGameId] = useState(null);
+  const [serverMult, setServerMult] = useState(1);
+  const [serverPayout, setServerPayout] = useState(0);
+  const [serverMines, setServerMines] = useState(7);
+  const [serverGems, setServerGems] = useState(18);
+
   const audioCtx = useRef(null);
   const mutedRef = useRef(false);
   useEffect(() => { mutedRef.current = muted; }, [muted]);
@@ -252,75 +282,143 @@ export default function MineGame() {
   }
 
   // ── Icon size calculation ──
-  // We compute how wide the tile grid actually is, then derive icon size from that.
-  const outerPad = isMobile ? 10 : 16;   // padding inside the card wrapper
-  const wrapperW = Math.min(winW, 860);   // max-width of wrapper
-  const availW = wrapperW - outerPad * 2; // usable width inside wrapper
-  // On desktop, subtract left panel width (210) + gap (12)
+  const outerPad = isMobile ? 10 : 16;
+  const wrapperW = Math.min(winW, 860);
+  const availW = wrapperW - outerPad * 2;
   const gridW = isMobile ? availW : availW - 210 - 12;
   const tileGap = Math.max(4, Math.min(7, Math.round(gridW * 0.018)));
   const tileW = Math.floor((gridW - tileGap * 4) / 5);
   const iconSize = Math.max(10, Math.round(tileW * 0.40));
 
-  const gems = TOTAL - mines;
-  const mult = calcMult(revealed, mines);
-  const payout = +(bet * mult).toFixed(2);
+  // Use server values when in game, otherwise use local calc for preview
+  const activeMines = game === "idle" ? mines : serverMines;
+  const activeGems = game === "idle" ? TOTAL - mines : serverGems;
+  const mult = game === "playing" || game === "won" ? serverMult : calcMult(revealed, mines);
+  const payout = game === "playing" || game === "won" ? serverPayout : +(bet * mult).toFixed(2);
   const profit = +(payout - bet).toFixed(2);
 
-  function startGame() {
-
-    if (betInput < 40) return toast.error("Minimum bet is  £40.");
-
+  // ─── START GAME (API) ─────────────────────────────────────────────────────
+  async function startGame() {
     const b = Math.max(0, parseFloat(betInput) || 0);
-    if (b <= 0 || b > balance) return;
-    setBet(b);
-    const bd = genBoard(mines);
-    boardData.current = bd;
-    setBoard(Array(TOTAL).fill("hidden"));
-    setRevealed(0);
-    setGame("playing");
-    setBalance(p => +(p - b).toFixed(2));
-    playClickSound(getCtx());
-  }
+    if (b <= 0) return toast.error("Enter a valid bet amount.");
+    if (b > balance) return toast.error("Insufficient balance.");
 
-  function pickTile(idx) {
-    if (game !== "playing") return;
-    const type = boardData.current[idx];
-    const nb = [...board];
-    if (type === "mine") {
-      boardData.current.forEach((t, i) => { if (t === "mine") nb[i] = "mine"; });
-      setBoard(nb); setGame("lost");
-      playBombSound(getCtx());
-    } else {
-      nb[idx] = "gem";
-      const nr = revealed + 1;
-      setBoard(nb); setRevealed(nr);
-      playDiamondSound(getCtx());
-      const nm = calcMult(nr, mines);
-      if (nr === gems) {
-        const win = +(bet * nm).toFixed(2);
-        setGame("won"); setBalance(p => +(p + win).toFixed(2));
-        playCashoutSound(getCtx());
+    setLoading(true);
+    try {
+      const res = await axiosSecure.post("/mine/start", {
+        gemCount: TOTAL - mines,
+        bombCount: mines,
+        betAmount: b,
+      });
+
+      if (res.data?.success) {
+        const d = res.data.data;
+        setGameId(d.gameId);
+        setBet(d.bet);
+        setServerMult(d.multiplier);
+        setServerPayout(d.currentPayout);
+        setServerMines(d.mines);
+        setServerGems(d.gems);
+        setBoard(d.board); // all "hidden" from server
+        setRevealed(d.revealed);
+        setGame("playing");
+        setBalance(p => +(p - d.bet).toFixed(2));
+        playClickSound(getCtx());
+      } else {
+        toast.error(res.data?.message || "Failed to start game.");
       }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Server error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
+  // ─── REVEAL TILE (API) ────────────────────────────────────────────────────
+  async function pickTile(idx) {
+    if (game !== "playing" || loading) return;
+
+    setLoading(true);
+    try {
+      const res = await axiosSecure.post("/mine/reveal", {
+        gameId,
+        tileIndex: idx,
+      });
+
+      if (res.data?.success) {
+        const d = res.data.data;
+        setServerMult(d.multiplier);
+        setServerPayout(d.currentPayout);
+        setRevealed(d.revealed);
+
+        const nb = [...board];
+
+        if (d.result === "lost") {
+          // Server reveals bomb positions — update board with mine locations
+          // The server board may contain revealed info; reflect it
+          if (d.board) {
+            d.board.forEach((cell, i) => {
+              nb[i] = cell; // use full server board on loss
+            });
+          } else {
+            nb[idx] = "mine";
+          }
+          setBoard(nb);
+          setGame("lost");
+          playBombSound(getCtx());
+
+        } else if (d.result === "won") {
+          nb[idx] = "gem";
+          setBoard(nb);
+          setGame("won");
+          setBalance(p => +(p + d.currentPayout).toFixed(2));
+          playCashoutSound(getCtx());
+
+        } else {
+          // pending — safe tile revealed
+          nb[idx] = "gem";
+          setBoard(nb);
+          playDiamondSound(getCtx());
+        }
+      } else {
+        toast.error(res.data?.message || "Failed to reveal tile.");
+      }
+    } catch (err) {
+      console.log(err);
+      
+      toast.error(err?.response?.data?.message || "Server error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ─── PICK RANDOM ─────────────────────────────────────────────────────────
   function pickRandom() {
-    if (game !== "playing") return;
+    if (game !== "playing" || loading) return;
     const idxs = board.reduce((a, s, i) => s === "hidden" ? [...a, i] : a, []);
     if (!idxs.length) return;
     pickTile(idxs[Math.floor(Math.random() * idxs.length)]);
   }
 
+  // ─── CASH OUT ─────────────────────────────────────────────────────────────
+  // Note: implement /mine/cashout endpoint call here if your backend has it.
+  // For now this does a client-side cashout since no cashout API was provided.
   function cashOut() {
-    if (game !== "playing" || revealed === 0) return;
+    if (game !== "playing" || revealed === 0 || loading) return;
     setBoard(b => b.map(s => s === "gem" ? "gem-safe" : s));
-    setGame("won"); setBalance(p => +(p + payout).toFixed(2));
+    setGame("won");
+    setBalance(p => +(p + payout).toFixed(2));
     playCashoutSound(getCtx());
   }
 
   function reset() {
-    setBoard(Array(TOTAL).fill("hidden")); setRevealed(0); setGame("idle"); setBet(0);
+    setBoard(Array(TOTAL).fill("hidden"));
+    setRevealed(0);
+    setGame("idle");
+    setBet(0);
+    setGameId(null);
+    setServerMult(1);
+    setServerPayout(0);
   }
 
   const halfBet = () => setBetInput(v => Math.max(0, parseFloat(v) / 2).toFixed(2));
@@ -361,7 +459,7 @@ export default function MineGame() {
   const MinesGemsCard = (
     <div style={S.card}>
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-        {[["Mines", mines], ["Gems", gems]].map(([lbl, val]) => (
+        {[["Mines", activeMines], ["Gems", activeGems]].map(([lbl, val]) => (
           <div key={lbl} style={{ flex: 1 }}>
             <div style={{ ...S.label, marginBottom: 5 }}>{lbl}</div>
             <div style={{ background: "#0d1220", borderRadius: 8, padding: "6px 8px", textAlign: "center", color: "#F5D334", fontSize: isMobile ? 15 : 18, fontWeight: 700, border: "1px solid rgba(255,255,255,0.07)", ...S.orb }}>{val}</div>
@@ -388,17 +486,17 @@ export default function MineGame() {
   const ActionButtons = (
     <>
       {game === "playing" && (
-        <button onClick={pickRandom} style={{ width: "100%", padding: "9px 0", borderRadius: 10, border: "1px solid rgba(255,255,255,0.09)", background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", ...S.raj, fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-          Pick random tile
+        <button onClick={pickRandom} disabled={loading} style={{ width: "100%", padding: "9px 0", borderRadius: 10, border: "1px solid rgba(255,255,255,0.09)", background: "rgba(255,255,255,0.05)", color: loading ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.6)", ...S.raj, fontWeight: 700, fontSize: 13, cursor: loading ? "not-allowed" : "pointer" }}>
+          {loading ? "Loading..." : "Pick random tile"}
         </button>
       )}
       {isIdle ? (
-        <button onClick={game === "idle" ? startGame : reset} style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: "none", background: "linear-gradient(90deg,#C78800,#F5D334)", color: "black", ...S.orb, fontWeight: 900, fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: "0 4px 18px rgba(199,136,0,0.35)", cursor: "pointer" }}>
-          {game === "idle" ? "▶  Bet" : game === "won" ? "▶  Play Again" : "▶  Try Again"}
+        <button onClick={game === "idle" ? startGame : reset} disabled={loading} style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: "none", background: loading ? "rgba(199,136,0,0.5)" : "linear-gradient(90deg,#C78800,#F5D334)", color: "black", ...S.orb, fontWeight: 900, fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: "0 4px 18px rgba(199,136,0,0.35)", cursor: loading ? "not-allowed" : "pointer" }}>
+          {loading ? "Starting..." : game === "idle" ? "▶  Bet" : game === "won" ? "▶  Play Again" : "▶  Try Again"}
         </button>
       ) : (
-        <button onClick={cashOut} disabled={revealed === 0} style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: revealed > 0 ? "2px solid #F5D334" : "1px solid rgba(255,255,255,0.08)", background: revealed > 0 ? "linear-gradient(90deg,#C78800,#F5D334)" : "rgba(255,255,255,0.03)", color: revealed > 0 ? "black" : "rgba(255,255,255,0.25)", ...S.orb, fontWeight: 900, fontSize: 12, letterSpacing: "0.1em", cursor: revealed > 0 ? "pointer" : "default" }}>
-          Cashout ₹{payout.toFixed(2)}
+        <button onClick={cashOut} disabled={revealed === 0 || loading} style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: revealed > 0 && !loading ? "2px solid #F5D334" : "1px solid rgba(255,255,255,0.08)", background: revealed > 0 && !loading ? "linear-gradient(90deg,#C78800,#F5D334)" : "rgba(255,255,255,0.03)", color: revealed > 0 && !loading ? "black" : "rgba(255,255,255,0.25)", ...S.orb, fontWeight: 900, fontSize: 12, letterSpacing: "0.1em", cursor: revealed > 0 && !loading ? "pointer" : "default" }}>
+          {loading ? "Processing..." : `Cashout ₹${payout.toFixed(2)}`}
         </button>
       )}
       <button onClick={() => setMuted(m => !m)} style={{ width: "100%", padding: "7px 0", borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.28)", cursor: "pointer", ...S.raj, fontWeight: 600, fontSize: 13 }}>
@@ -408,9 +506,9 @@ export default function MineGame() {
   );
 
   const TileGrid = (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: tileGap, width: "100%" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: tileGap, width: "100%", opacity: loading ? 0.7 : 1, pointerEvents: loading ? "none" : "auto", transition: "opacity 0.2s" }}>
       {Array(TOTAL).fill(null).map((_, i) => (
-        <Tile key={i} idx={i} state={board[i]} onPick={pickTile} disabled={game !== "playing"} iconSize={iconSize} />
+        <Tile key={i} idx={i} state={board[i]} onPick={pickTile} disabled={game !== "playing" || loading} iconSize={iconSize} />
       ))}
     </div>
   );
@@ -456,24 +554,15 @@ export default function MineGame() {
 
         {isMobile ? (
           // ──────────── MOBILE LAYOUT ────────────
-          // Board on top, then controls stacked below
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-
-            {/* Title + grid */}
             <h1 style={{ ...S.orb, fontWeight: 900, fontSize: 18, color: "#F5D334", letterSpacing: "0.15em", margin: 0 }}>MINES</h1>
             {TileGrid}
             {Banner}
-
-            {/* Bet */}
             {BetCard}
-
-            {/* Mines/Gems + Profit side by side */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {MinesGemsCard}
               {ProfitCard}
             </div>
-
-            {/* Buttons */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {ActionButtons}
             </div>
@@ -481,9 +570,7 @@ export default function MineGame() {
 
         ) : (
           // ──────────── DESKTOP LAYOUT ────────────
-          // Left panel + right panel side by side
           <div style={{ display: "flex", flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
-
             {/* Left */}
             <div style={{ width: 210, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
               {BetCard}
@@ -500,7 +587,6 @@ export default function MineGame() {
               {TileGrid}
               {Banner}
             </div>
-
           </div>
         )}
       </div>
