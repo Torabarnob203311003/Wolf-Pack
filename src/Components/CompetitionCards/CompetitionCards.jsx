@@ -82,10 +82,6 @@ function CompetitionCards() {
 
       if (res.data?.success && Array.isArray(res.data.data)) {
         const spinnerSegments = res.data.data[0].prizes;
-
-
-        console.log('Spinner segments:', spinnerSegments);
-
         setSegments(spinnerSegments);
       } else {
         console.warn('No spinner data found, using defaults');

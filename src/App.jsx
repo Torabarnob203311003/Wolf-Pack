@@ -24,7 +24,7 @@ import VerifyOTP from "./Pages/VerifyOTP/VerifyOTP";
 import ResetPassword from "./Pages/ResetPassword/ResetPassword";
 import Success from "./Pages/Success/Success";
 import SponsorPage from "./Pages/Sponsor/Sponsor";
-import TrustpilotSection from "./Components/TrustPilotSection/TrustPilotSection";
+// import TrustpilotSection from "./Components/TrustPilotSection/TrustPilotSection";
 
 function App() {
   return (

@@ -269,7 +269,6 @@ const S = {
 axiosSecure.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    console.log('Attaching token to request:', token);
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -435,7 +434,8 @@ function playUrgentTickSound(ctx) {
         toast.error(res.data?.message || "Failed to start game.");
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Server error. Please try again.");
+      const errorMsg = err?.response?.data?.error || err?.response?.data?.message || "Server error. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -488,8 +488,8 @@ function playUrgentTickSound(ctx) {
         toast.error(res.data?.message || "Failed to reveal tile.");
       }
     } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data?.message || "Server error. Please try again.");
+      const errorMsg = err?.response?.data?.error || err?.response?.data?.message || "Server error. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
