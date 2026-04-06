@@ -65,7 +65,7 @@ function playClickSound(ctx) {
 // ─── MATH ────────────────────────────────────────────────────────────────────
 const HOUSE_EDGE = 0.08;
 const TOTAL = 25;
-const TIMER_DURATION = 10; // seconds
+const TIMER_DURATION = 30; // seconds
 
 function calcMult(rev, bombs) {
   let m = 1; const gems = TOTAL - bombs;
@@ -504,13 +504,35 @@ function playUrgentTickSound(ctx) {
   }
 
   // ─── CASH OUT ─────────────────────────────────────────────────────────────
-  function cashOut() {
+  async function cashOut() {
     if (game !== "playing" || revealed === 0 || loading) return;
-    setBoard(b => b.map(s => s === "gem" ? "gem-safe" : s));
-    setGame("won");
-    setBalance(p => +(p + payout).toFixed(2));
-    playCashoutSound(getCtx());
+
+    setLoading(true);
+    try {
+      const res = await axiosSecure.post("/mine/cashout", { gameId });
+      if (res.data?.success) {
+        const d = res.data.data;
+        // Use backend board or fallback to local transformation
+        const newBoard = d.board || board.map(s => s === "gem" ? "gem-safe" : s);
+        setBoard(newBoard);
+        setGame("won");
+        setBalance(prev => +(prev + d.currentPayout).toFixed(2));
+        setServerMult(d.multiplier);
+        setServerPayout(d.currentPayout);
+        setRevealed(d.revealed);
+        playCashoutSound(getCtx());
+        toast.success(`Cashed out £${d.currentPayout.toFixed(2)}`);
+      } else {
+        toast.error(res.data?.message || "Cashout failed");
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.error || err?.response?.data?.message || "Server error";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   }
+
 
   function reset() {
     setBoard(Array(TOTAL).fill("hidden"));
