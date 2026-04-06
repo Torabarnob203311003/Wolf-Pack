@@ -498,7 +498,7 @@ function playUrgentTickSound(ctx) {
   // ─── PICK RANDOM ─────────────────────────────────────────────────────────
   function pickRandom() {
     if (game !== "playing" || loading) return;
-    const idxs = board.reduce((a, s, i) => s === "hidden" ? [...a, i] : a, []);
+    const idxs = board.reduce((a, s, i) => s === "hidden" ? [...a, i] : a, []);p
     if (!idxs.length) return;
     pickTile(idxs[Math.floor(Math.random() * idxs.length)]);
   }
