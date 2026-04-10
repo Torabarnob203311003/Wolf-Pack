@@ -411,7 +411,7 @@ function playUrgentTickSound(ctx) {
 
     setLoading(true);
     try {
-      const res = await axiosSecure.post("/mine/start", {
+      const res = await axiosSecure.post("/mine/v1/start", {
         gemCount: TOTAL - mines,
         bombCount: mines,
         betAmount: b,
@@ -447,7 +447,7 @@ function playUrgentTickSound(ctx) {
 
     setLoading(true);
     try {
-      const res = await axiosSecure.post("/mine/reveal", {
+      const res = await axiosSecure.post("/mine/v1/reveal", {
         gameId,
         tileIndex: idx,
       });
@@ -509,7 +509,7 @@ function playUrgentTickSound(ctx) {
 
     setLoading(true);
     try {
-      const res = await axiosSecure.post("/mine/cashout", { gameId });
+      const res = await axiosSecure.post("/mine/v1/cashout", { gameId });
       if (res.data?.success) {
         const d = res.data.data;
         // Use backend board or fallback to local transformation
