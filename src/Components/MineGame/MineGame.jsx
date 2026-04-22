@@ -406,8 +406,12 @@ function playUrgentTickSound(ctx) {
   // ─── START GAME (API) ─────────────────────────────────────────────────────
   async function startGame() {
     const b = Math.max(0, parseFloat(betInput) || 0);
+    if(b > 20) return toast.error("Minimum bet is £20.");
     if (b <= 0) return toast.error("Enter a valid bet amount.");
     if (b > balance) return toast.error("Insufficient balance.");
+
+    if(mines < 7 || mines > 20) return toast.error("Mines must be between 7 and 20.");
+    
 
     setLoading(true);
     try {
@@ -590,8 +594,8 @@ function playUrgentTickSound(ctx) {
           </div>
         ))}
       </div>
-      <input type="range" min={1} max={24} value={mines} disabled={game === "playing"}
-        onChange={e => setMines(+e.target.value)} style={{ width: "100%" }} />
+     <input type="range" min={5} max={20} value={mines} disabled={game === "playing"}
+  onChange={e => setMines(+e.target.value)} style={{ width: "100%" }} />
     </div>
   );
 
