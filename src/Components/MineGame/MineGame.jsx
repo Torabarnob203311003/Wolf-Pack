@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import axiosSecure from "../../lib/axiosSecure";
+import { useAuth } from "../../context/AuthContext";
 
 // ─── SOUND ENGINE ────────────────────────────────────────────────────────────
 function createAudioCtx() {
@@ -61,11 +62,35 @@ function playClickSound(ctx) {
   g.gain.setValueAtTime(0.07, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
   osc.start(t); osc.stop(t + 0.06);
 }
+function playTickSound(ctx) {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.connect(g); g.connect(ctx.destination);
+  osc.type = "sine"; osc.frequency.value = 660;
+  g.gain.setValueAtTime(0.09, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  osc.start(t); osc.stop(t + 0.08);
+}
+function playUrgentTickSound(ctx) {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.connect(g); g.connect(ctx.destination);
+  osc.type = "square"; osc.frequency.value = 880;
+  g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  osc.start(t); osc.stop(t + 0.1);
+  const osc2 = ctx.createOscillator(), g2 = ctx.createGain();
+  osc2.connect(g2); g2.connect(ctx.destination);
+  osc2.type = "sine"; osc2.frequency.setValueAtTime(180, t);
+  osc2.frequency.exponentialRampToValueAtTime(80, t + 0.12);
+  g2.gain.setValueAtTime(0.18, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  osc2.start(t); osc2.stop(t + 0.12);
+}
 
 // ─── MATH ────────────────────────────────────────────────────────────────────
 const HOUSE_EDGE = 0.08;
 const TOTAL = 25;
-const TIMER_DURATION = 30; // seconds
+const TIMER_DURATION = 30;
 
 function calcMult(rev, bombs) {
   let m = 1; const gems = TOTAL - bombs;
@@ -281,8 +306,9 @@ axiosSecure.interceptors.request.use(
 export default function MineGame() {
   const winW = useWindowWidth();
   const isMobile = winW < 600;
+  const { user, refetchUser } = useAuth();
 
-  const [balance, setBalance] = useState(1000);
+  const [balance, setBalance] = useState(0);
   const [betInput, setBetInput] = useState("0.00");
   const [bet, setBet] = useState(0);
   const [mines, setMines] = useState(7);
@@ -294,6 +320,7 @@ export default function MineGame() {
 
   // ─── Timer state ──────────────────────────────────────────────────────────
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
+  const [expiresAt, setExpiresAt] = useState(null);
 
   // ─── Backend state ────────────────────────────────────────────────────────
   const [gameId, setGameId] = useState(null);
@@ -304,9 +331,7 @@ export default function MineGame() {
 
   const audioCtx = useRef(null);
   const mutedRef = useRef(false);
-  // Keep a ref to revealed so the timer callback can read current value
   const revealedRef = useRef(0);
-  const payoutRef = useRef(0);
   const gameRef = useRef("idle");
 
   useEffect(() => { mutedRef.current = muted; }, [muted]);
@@ -319,80 +344,79 @@ export default function MineGame() {
     return mutedRef.current ? null : audioCtx.current;
   }
 
-  function playTickSound(ctx) {
-  if (!ctx) return;
-  const t = ctx.currentTime;
-  const osc = ctx.createOscillator(), g = ctx.createGain();
-  osc.connect(g); g.connect(ctx.destination);
-  osc.type = "sine"; osc.frequency.value = 660;
-  g.gain.setValueAtTime(0.09, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-  osc.start(t); osc.stop(t + 0.08);
-}
+  // ─── TIMER EFFECT — driven by server expiresAt ────────────────────────────
+  useEffect(() => {
+    if (!expiresAt || game !== "playing") return;
 
-function playUrgentTickSound(ctx) {
-  if (!ctx) return;
-  const t = ctx.currentTime;
-  // Sharp high beep
-  const osc = ctx.createOscillator(), g = ctx.createGain();
-  osc.connect(g); g.connect(ctx.destination);
-  osc.type = "square"; osc.frequency.value = 880;
-  g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-  osc.start(t); osc.stop(t + 0.1);
-  // Low thud underneath
-  const osc2 = ctx.createOscillator(), g2 = ctx.createGain();
-  osc2.connect(g2); g2.connect(ctx.destination);
-  osc2.type = "sine"; osc2.frequency.setValueAtTime(180, t);
-  osc2.frequency.exponentialRampToValueAtTime(80, t + 0.12);
-  g2.gain.setValueAtTime(0.18, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-  osc2.start(t); osc2.stop(t + 0.12);
-}
+    // Initialise display immediately
+    const init = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+    setTimeLeft(init);
 
-  // ─── TIMER EFFECT ─────────────────────────────────────────────────────────
- useEffect(() => {
-  if (game !== "playing") return;
-  setTimeLeft(TIMER_DURATION);
+    const interval = setInterval(() => {
+      const remaining = Math.max(
+        0,
+        Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000)
+      );
+      setTimeLeft(remaining);
 
-  const interval = setInterval(() => {
-    setTimeLeft(prev => {
-      if (prev <= 1) {
+      if (remaining === 0) {
         clearInterval(interval);
-        if (revealedRef.current > 0) {
-          setBoard(b => b.map(s => s === "gem" ? "gem-safe" : s));
-          setGame("won");
-          setBalance(p => +(p + payoutRef.current).toFixed(2));
-          playCashoutSound(mutedRef.current ? null : audioCtx.current);
-        } else {
-          setGame("lost");
-          playBombSound(mutedRef.current ? null : audioCtx.current);
-        }
-        return 0;
+        // Timer expired — session is dead on the server, no payout
+        localStorage.removeItem('activeGameId');
+        setGame("expired");
+        playBombSound(mutedRef.current ? null : audioCtx.current);
+        return;
       }
 
-      // 🔔 Play tick sound on every countdown step
       const ctx = mutedRef.current ? null : audioCtx.current;
-      if (prev <= 4) {
-        // Final 3 seconds — urgent double-beep
+      if (remaining <= 4) {
         playUrgentTickSound(ctx);
       } else {
-        // Normal tick
         playTickSound(ctx);
       }
+    }, 1000);
 
-      return prev - 1;
-    });
-  }, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt, game]);
 
-  return () => clearInterval(interval);
-}, [game]);
-
-  // Keep payoutRef in sync so timer can access it
   const activeMines = game === "idle" ? mines : serverMines;
   const activeGems = game === "idle" ? TOTAL - mines : serverGems;
   const mult = game === "playing" || game === "won" ? serverMult : calcMult(revealed, mines);
   const payout = game === "playing" || game === "won" ? serverPayout : +(bet * mult).toFixed(2);
   const profit = +(payout - bet).toFixed(2);
 
-  useEffect(() => { payoutRef.current = payout; }, [payout]);
+  // Sync credit balance from context when not mid-game
+  useEffect(() => {
+    if (user?.credit !== undefined && gameRef.current === 'idle') {
+      setBalance(user.credit);
+    }
+  }, [user?.credit]);
+
+  // Reconnect: restore in-progress game on mount
+  useEffect(() => {
+    const savedId = localStorage.getItem('activeGameId');
+    if (!savedId) return;
+
+    axiosSecure.get(`/mine/v1/state/${savedId}`)
+      .then(res => {
+        const d = res.data?.data;
+        if (!d || d.result !== 'pending') {
+          localStorage.removeItem('activeGameId');
+          return;
+        }
+        setGameId(d.gameId);
+        setBet(d.bet);
+        setServerMult(d.multiplier);
+        setServerPayout(d.currentPayout);
+        setServerMines(d.mines);
+        setServerGems(d.gems);
+        setBoard(d.board);
+        setRevealed(d.revealed);
+        setExpiresAt(d.expiresAt);
+        setGame('playing');
+      })
+      .catch(() => localStorage.removeItem('activeGameId'));
+  }, []);
 
   // ── Icon size calculation ──
   const outerPad = isMobile ? 10 : 16;
@@ -403,15 +427,13 @@ function playUrgentTickSound(ctx) {
   const tileW = Math.floor((gridW - tileGap * 4) / 5);
   const iconSize = Math.max(10, Math.round(tileW * 0.40));
 
-  // ─── START GAME (API) ─────────────────────────────────────────────────────
+  // ─── START GAME ───────────────────────────────────────────────────────────
   async function startGame() {
     const b = Math.max(0, parseFloat(betInput) || 0);
-    if(b > 20) return toast.error("Minimum bet is £20.");
     if (b <= 0) return toast.error("Enter a valid bet amount.");
+    if (b > 40) return toast.error("Maximum bet is 40 credits.");
     if (b > balance) return toast.error("Insufficient balance.");
-
-    if(mines < 7 || mines > 20) return toast.error("Mines must be between 7 and 20.");
-    
+    if (mines < 7 || mines > 20) return toast.error("Mines must be between 7 and 20.");
 
     setLoading(true);
     try {
@@ -431,9 +453,13 @@ function playUrgentTickSound(ctx) {
         setServerGems(d.gems);
         setBoard(d.board);
         setRevealed(d.revealed);
-        setGame("playing"); // ← triggers timer reset via useEffect
+        setExpiresAt(d.expiresAt);
+        localStorage.setItem('activeGameId', d.gameId);
+        setGame("playing");
+        // Optimistic credit deduction for instant UI feedback
         setBalance(p => +(p - d.bet).toFixed(2));
         playClickSound(getCtx());
+        refetchUser();
       } else {
         toast.error(res.data?.message || "Failed to start game.");
       }
@@ -445,7 +471,7 @@ function playUrgentTickSound(ctx) {
     }
   }
 
-  // ─── REVEAL TILE (API) ────────────────────────────────────────────────────
+  // ─── REVEAL TILE ──────────────────────────────────────────────────────────
   async function pickTile(idx) {
     if (game !== "playing" || loading) return;
 
@@ -462,30 +488,25 @@ function playUrgentTickSound(ctx) {
         setServerPayout(d.currentPayout);
         setRevealed(d.revealed);
 
-        const nb = [...board];
-
         if (d.result === "lost") {
-          if (d.board) {
-            d.board.forEach((cell, i) => { nb[i] = cell; });
-          } else {
-            nb[idx] = "mine";
-          }
-          setBoard(nb);
+          localStorage.removeItem('activeGameId');
+          // Use full board from server to reveal all mines
+          setBoard(d.board || board.map((s, i) => i === idx ? "mine" : s));
           setGame("lost");
           playBombSound(getCtx());
 
         } else if (d.result === "won") {
-          nb[idx] = "gem";
-          setBoard(nb);
+          localStorage.removeItem('activeGameId');
+          // Use full board from server (all gems revealed)
+          setBoard(d.board || board);
           setGame("won");
-          setBalance(p => +(p + d.currentPayout).toFixed(2));
           playCashoutSound(getCtx());
+          // credit unchanged; rewardPoint increased
+          refetchUser();
 
         } else {
-          nb[idx] = "gem";
-          setBoard(nb);
-          // Reset timer on each successful reveal
-          // setTimeLeft(TIMER_DURATION);
+          // result === "pending" — use server board (shows gem-safe on clicked tile)
+          setBoard(d.board || board);
           playDiamondSound(getCtx());
         }
       } else {
@@ -502,7 +523,7 @@ function playUrgentTickSound(ctx) {
   // ─── PICK RANDOM ─────────────────────────────────────────────────────────
   function pickRandom() {
     if (game !== "playing" || loading) return;
-    const idxs = board.reduce((a, s, i) => s === "hidden" ? [...a, i] : a, []);p
+    const idxs = board.reduce((a, s, i) => s === "hidden" ? [...a, i] : a, []);
     if (!idxs.length) return;
     pickTile(idxs[Math.floor(Math.random() * idxs.length)]);
   }
@@ -516,16 +537,16 @@ function playUrgentTickSound(ctx) {
       const res = await axiosSecure.post("/mine/v1/cashout", { gameId });
       if (res.data?.success) {
         const d = res.data.data;
-        // Use backend board or fallback to local transformation
-        const newBoard = d.board || board.map(s => s === "gem" ? "gem-safe" : s);
-        setBoard(newBoard);
+        localStorage.removeItem('activeGameId');
+        setBoard(d.board || board.map(s => s === "gem" ? "gem-safe" : s));
         setGame("won");
-        setBalance(prev => +(prev + d.currentPayout).toFixed(2));
         setServerMult(d.multiplier);
         setServerPayout(d.currentPayout);
         setRevealed(d.revealed);
         playCashoutSound(getCtx());
-        toast.success(`Cashed out £${d.currentPayout.toFixed(2)}`);
+        toast.success(`Cashed out! +${d.currentPayout.toFixed(2)} rp added.`);
+        // credit unchanged; rewardPoint increased
+        refetchUser();
       } else {
         toast.error(res.data?.message || "Cashout failed");
       }
@@ -537,8 +558,8 @@ function playUrgentTickSound(ctx) {
     }
   }
 
-
   function reset() {
+    localStorage.removeItem('activeGameId');
     setBoard(Array(TOTAL).fill("hidden"));
     setRevealed(0);
     setGame("idle");
@@ -546,12 +567,14 @@ function playUrgentTickSound(ctx) {
     setGameId(null);
     setServerMult(1);
     setServerPayout(0);
+    setExpiresAt(null);
     setTimeLeft(TIMER_DURATION);
+    if (user?.credit !== undefined) setBalance(user.credit);
   }
 
   const halfBet = () => setBetInput(v => Math.max(0, parseFloat(v) / 2).toFixed(2));
   const doubleBet = () => setBetInput(v => Math.min(balance, parseFloat(v) * 2).toFixed(2));
-  const isIdle = game === "idle" || game === "won" || game === "lost";
+  const isIdle = game === "idle" || game === "won" || game === "lost" || game === "expired";
 
   // ── Reusable sub-components ──────────────────────────────────────────────
 
@@ -559,7 +582,7 @@ function playUrgentTickSound(ctx) {
     <div style={S.card}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
         <span style={S.label}>Bet Amount</span>
-        <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, fontWeight: 700 }}>£{balance.toFixed(2)}</span>
+        <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, fontWeight: 700 }}>{balance.toFixed(2)} cr</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#0d1220", borderRadius: 8, padding: "8px 10px", border: "1px solid rgba(255,255,255,0.07)" }}>
         <input
@@ -594,8 +617,8 @@ function playUrgentTickSound(ctx) {
           </div>
         ))}
       </div>
-     <input type="range" min={5} max={20} value={mines} disabled={game === "playing"}
-  onChange={e => setMines(+e.target.value)} style={{ width: "100%" }} />
+      <input type="range" min={5} max={20} value={mines} disabled={game === "playing"}
+        onChange={e => setMines(+e.target.value)} style={{ width: "100%" }} />
     </div>
   );
 
@@ -603,10 +626,10 @@ function playUrgentTickSound(ctx) {
     <div style={S.card}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 2 }}>
         <span style={S.label}>Profit ({mult.toFixed(2)}x)</span>
-        <span style={{ color: "#F5D334", fontSize: 11, fontWeight: 700 }}>£{profit.toFixed(2)}</span>
+        <span style={{ color: "#F5D334", fontSize: 11, fontWeight: 700 }}>{profit.toFixed(2)} rp</span>
       </div>
       <div style={{ background: "rgba(245,211,52,0.06)", border: "1px solid rgba(245,211,52,0.25)", borderRadius: 8, padding: "7px 10px", ...S.orb, fontSize: 15, fontWeight: 700, color: "#F5D334" }}>
-        {profit.toFixed(2)}
+        {profit.toFixed(2)} rp
       </div>
     </div>
   );
@@ -630,9 +653,9 @@ function playUrgentTickSound(ctx) {
       transition: "border-color 0.3s, background 0.3s",
     }}>
       <div>
-        <div style={{ ...S.label, marginBottom: 3 }}>Auto {revealed > 0 ? "cashout" : "end"} in</div>
+        <div style={{ ...S.label, marginBottom: 3 }}>Auto end in</div>
         <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, ...S.raj }}>
-          {revealed > 0 ? "Will cashout your gems" : "No gems — round ends"}
+          {revealed > 0 ? "Cash out to keep your winnings" : "No gems — round ends"}
         </div>
       </div>
       <TimerRing timeLeft={timeLeft} total={TIMER_DURATION} />
@@ -652,7 +675,7 @@ function playUrgentTickSound(ctx) {
         </button>
       ) : (
         <button onClick={cashOut} disabled={revealed === 0 || loading} style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: revealed > 0 && !loading ? "2px solid #F5D334" : "1px solid rgba(255,255,255,0.08)", background: revealed > 0 && !loading ? "linear-gradient(90deg,#C78800,#F5D334)" : "rgba(255,255,255,0.03)", color: revealed > 0 && !loading ? "black" : "rgba(255,255,255,0.25)", ...S.orb, fontWeight: 900, fontSize: 12, letterSpacing: "0.1em", cursor: revealed > 0 && !loading ? "pointer" : "default" }}>
-          {loading ? "Processing..." : `Cashout £${payout.toFixed(2)}`}
+          {loading ? "Processing..." : `Cashout ${payout.toFixed(2)} rp`}
         </button>
       )}
       <button onClick={() => setMuted(m => !m)} style={{ width: "100%", padding: "7px 0", borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.28)", cursor: "pointer", ...S.raj, fontWeight: 600, fontSize: 13 }}>
@@ -671,11 +694,15 @@ function playUrgentTickSound(ctx) {
 
   const Banner = game === "won" ? (
     <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "rgba(245,211,52,0.08)", border: "1px solid rgba(245,211,52,0.25)", color: "#F5D334", fontSize: isMobile ? 12 : 14, ...S.raj, fontWeight: 600 }}>
-      💎 CASHED OUT · £{payout.toFixed(2)} · {mult.toFixed(3)}×
+      💎 CASHED OUT · +{payout.toFixed(2)} rp · {mult.toFixed(3)}×
     </div>
   ) : game === "lost" ? (
     <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.3)", color: "#f87171", fontSize: isMobile ? 12 : 14, ...S.raj, fontWeight: 600 }}>
-      💣 BOOM · -£{bet.toFixed(2)}
+      💣 BOOM · -{bet.toFixed(2)} cr
+    </div>
+  ) : game === "expired" ? (
+    <div style={{ textAlign: "center", padding: "10px 16px", borderRadius: 12, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171", fontSize: isMobile ? 12 : 14, ...S.raj, fontWeight: 600 }}>
+      ⏱ TIME&apos;S UP · Session expired · -{bet.toFixed(2)} cr
     </div>
   ) : null;
 

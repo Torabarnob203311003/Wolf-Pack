@@ -11,7 +11,17 @@ import {
   Coins,
   RefreshCcw,
   History,
+  Bomb,
+  Star,
 } from "lucide-react";
+
+const MINE_ALLOWED_EMAILS = [
+  'allendodul6@gmail.com',
+  'zxrcrazy@gmail.com',
+  'franny.c20@googlemail.com',
+  'khendleman@gmail.com',
+  'robkelly3234@icloud.com',
+];
 
 
 function Navbar() {
@@ -20,6 +30,7 @@ function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const canAccessMine = user && MINE_ALLOWED_EMAILS.includes(user.email);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -140,11 +151,18 @@ function Navbar() {
         <div className="hidden md:flex items-center space-x-3">
           {user && isAuthenticated ? (
             <div className="relative flex items-center gap-3" ref={dropdownRef}>
-              {/* Points Display */}
+              {/* Credit Display */}
               <div className="flex items-center h-10 gap-2 px-3 py-1.5 bg-gradient-to-r from-yellow-600/20 to-yellow-500/20 border border-yellow-600/30 rounded-full">
                 <Coins className="w-4 h-4 text-yellow-500" />
                 <span className="text-sm font-semibold text-yellow-500">
                   {user?.credit}
+                </span>
+              </div>
+              {/* Reward Points Display */}
+              <div className="flex items-center h-10 gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-600/20 to-purple-500/20 border border-purple-600/30 rounded-full">
+                <Star className="w-4 h-4 text-purple-400" />
+                <span className="text-sm font-semibold text-purple-400">
+                  {user?.rewardPoint ?? 0}
                 </span>
               </div>
 
@@ -190,12 +208,20 @@ function Navbar() {
                         </p>
                       </div>
                     </div>
-                    {/* Points in dropdown */}
-                    <div className="flex items-center gap-2 px-2 py-1.5 bg-yellow-500/10 border border-yellow-600/20 rounded">
-                      <Coins className="w-4 h-4 text-yellow-500" />
-                      <span className="text-xs font-medium text-yellow-500">
-                        {user?.credit} Points
-                      </span>
+                    {/* Balances in dropdown */}
+                    <div className="flex gap-2 mt-1">
+                      <div className="flex items-center gap-1.5 px-2 py-1.5 bg-yellow-500/10 border border-yellow-600/20 rounded flex-1">
+                        <Coins className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
+                        <span className="text-xs font-medium text-yellow-500 truncate">
+                          {user?.credit} cr
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2 py-1.5 bg-purple-500/10 border border-purple-600/20 rounded flex-1">
+                        <Star className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <span className="text-xs font-medium text-purple-400 truncate">
+                          {user?.rewardPoint ?? 0} rp
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -226,6 +252,21 @@ function Navbar() {
                         Spinning History
                       </span>
                     </button>
+
+                    {canAccessMine && (
+                      <button
+                        onClick={() => {
+                          navigate("/mine-history");
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-800/50 transition-colors text-left group"
+                      >
+                        <Bomb className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                        <span className="text-sm text-gray-300 group-hover:text-white">
+                          Mine History
+                        </span>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => {
@@ -370,12 +411,20 @@ function Navbar() {
                   </p>
                 </div>
               </div>
-              {/* Points in mobile */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-600/20 rounded">
-                <Coins className="w-4 h-4 text-yellow-500" />
-                <span className="text-sm font-medium text-yellow-500">
-                  {user?.credit} Points
-                </span>
+              {/* Balances in mobile */}
+              <div className="flex gap-2">
+                <div className="flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-600/20 rounded flex-1">
+                  <Coins className="w-4 h-4 text-yellow-500 shrink-0" />
+                  <span className="text-sm font-medium text-yellow-500">
+                    {user?.credit} cr
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-purple-500/10 border border-purple-600/20 rounded flex-1">
+                  <Star className="w-4 h-4 text-purple-400 shrink-0" />
+                  <span className="text-sm font-medium text-purple-400">
+                    {user?.rewardPoint ?? 0} rp
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -466,6 +515,21 @@ function Navbar() {
                     Spinning History
                   </span>
                 </button>
+
+                {canAccessMine && (
+                  <button
+                    onClick={() => {
+                      navigate("/mine-history");
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-4 py-2.5 bg-gray-900/50 hover:bg-gray-800/50 rounded-lg transition-colors text-left border border-gray-800"
+                  >
+                    <Bomb className="w-5 h-5 text-yellow-500" />
+                    <span className="text-sm text-white font-medium">
+                      Mine History
+                    </span>
+                  </button>
+                )}
 
                 <button
                   onClick={() => {

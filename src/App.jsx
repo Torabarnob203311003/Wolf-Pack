@@ -10,6 +10,7 @@ import Footer from "./Components/Common/Footer";
 import SignIn from "./Pages/SignIn/SignIn";
 import SignUp from "./Pages/SignUp/SignUp";
 import SpinningHistoryPage from "./Pages/SpinningHistory/SpinningHistory";
+import MineHistoryPage from "./Pages/MineHistory/MineHistory";
 import RaffleHistory from "./Pages/RaffleHistory/RaffleHistory";
 import TopUpPage from "./Pages/TopUpPage/TopUpPage";
 import PrivateRoute from "./PrivateRouter/PrivateRoute";
@@ -143,6 +144,17 @@ function App() {
               <>
                 <Navbar />
                 <SpinningHistoryPage />
+                <Footer />
+              </>
+            }
+          />
+
+          <Route
+            path="/mine-history"
+            element={
+              <>
+                <Navbar />
+                <MineHistoryPage />
                 <Footer />
               </>
             }
