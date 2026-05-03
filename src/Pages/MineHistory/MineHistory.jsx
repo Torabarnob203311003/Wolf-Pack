@@ -133,7 +133,7 @@ const MineHistoryPage = () => {
                   <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Multiplier</th>
                   <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Mines</th>
                   <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Tiles Revealed</th>
-                  <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Date</th>
+                  {/* <th className="text-gray-400 py-4 px-6 text-left text-xs uppercase tracking-wider">Date</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -164,9 +164,9 @@ const MineHistoryPage = () => {
                       <td className="py-4 px-6 text-gray-300">×{game.multiplier?.toFixed(4)}</td>
                       <td className="py-4 px-6 text-gray-300">{game.mines}</td>
                       <td className="py-4 px-6 text-gray-300">{game.revealed}</td>
-                      <td className="py-4 px-6 text-gray-400">
+                      {/* <td className="py-4 px-6 text-gray-400">
                         {new Date(game.expiresAt).toLocaleString()}
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 )}
