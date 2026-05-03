@@ -97,20 +97,20 @@ const MineHistoryPage = () => {
               <p className="text-gray-400 text-sm mb-1">Total Games</p>
               <p className="text-2xl font-bold">{stats.totalGames}</p>
             </div>
-            <div className="bg-[#161616] rounded-xl p-5 border border-gray-800 hover:border-gray-700 transition">
+            {/* <div className="bg-[#161616] rounded-xl p-5 border border-gray-800 hover:border-gray-700 transition">
               <p className="text-gray-400 text-sm mb-1">Win Rate</p>
               <p className="text-2xl font-bold text-yellow-400">{winRate}%</p>
-            </div>
+            </div> */}
             <div className="bg-[#161616] rounded-xl p-5 border border-gray-800 hover:border-gray-700 transition">
               <p className="text-gray-400 text-sm mb-1">Total Bet</p>
               <p className="text-2xl font-bold">{stats.totalBet} cr</p>
             </div>
-            <div className="bg-[#161616] rounded-xl p-5 border border-gray-800 hover:border-gray-700 transition">
+            {/* <div className="bg-[#161616] rounded-xl p-5 border border-gray-800 hover:border-gray-700 transition">
               <p className="text-gray-400 text-sm mb-1">Net P/L</p>
               <p className={`text-2xl font-bold ${stats.netProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {stats.netProfit >= 0 ? '+' : ''}{stats.netProfit?.toFixed(2)} rp
               </p>
-            </div>
+            </div> */}
           </div>
         )}
 
