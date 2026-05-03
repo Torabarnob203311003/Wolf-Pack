@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [mineEnabled, setMineEnabled] = useState(true)
 
   // Memoized refetch function to avoid dependency issues
   const refetchUser = useCallback(async () => {
@@ -86,6 +87,12 @@ export const AuthProvider = ({ children }) => {
     checkAuth()
   }, [])
 
+  useEffect(() => {
+    axiosSecure.get('/mine/v2/status')
+      .then(res => setMineEnabled(res.data?.data?.enabled ?? true))
+      .catch(() => setMineEnabled(true));
+  }, []);
+
   const login = async (email, password) => {
     try {
       const res = await axiosSecure.post('/users/login', { email, password })
@@ -119,14 +126,15 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
+    <AuthContext.Provider value={{
+      user,
       setUser,
-      isAuthenticated, 
-      loading, 
-      login, 
+      isAuthenticated,
+      loading,
+      login,
       logout,
-      refetchUser 
+      refetchUser,
+      mineEnabled,
     }}>
       {children}
     </AuthContext.Provider>

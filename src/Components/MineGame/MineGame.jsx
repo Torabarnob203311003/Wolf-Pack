@@ -88,18 +88,18 @@ function playUrgentTickSound(ctx) {
 }
 
 // ─── MATH ────────────────────────────────────────────────────────────────────
-const HOUSE_EDGE = 0.08;
+const PAYOUT_FACTOR = 0.15; // matches backend bet 6-15 tier
 const TOTAL = 25;
 const TIMER_DURATION = 30;
 
+// Additive risk-premium formula — always ≥ 1.0, no negative profits
 function calcMult(rev, bombs) {
-  let m = 1; const gems = TOTAL - bombs;
+  if (rev === 0) return 1;
+  let increment = 0;
   for (let i = 0; i < rev; i++) {
-    const rem = TOTAL - i, sr = gems - i;
-    if (sr <= 0 || rem <= 0) break;
-    m *= (rem / sr) * (1 - HOUSE_EDGE);
+    increment += (bombs / (TOTAL - i)) * PAYOUT_FACTOR;
   }
-  return Math.max(1, m);
+  return Math.max(1, parseFloat((1 + increment).toFixed(4)));
 }
 
 // ─── TIMER RING ───────────────────────────────────────────────────────────────
@@ -320,7 +320,7 @@ export default function MineGame() {
 
   // ─── Timer state ──────────────────────────────────────────────────────────
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
-  const [expiresAt, setExpiresAt] = useState(null);
+  const [gameStartedAt, setGameStartedAt] = useState(null);
 
   // ─── Backend state ────────────────────────────────────────────────────────
   const [gameId, setGameId] = useState(null);
@@ -344,24 +344,20 @@ export default function MineGame() {
     return mutedRef.current ? null : audioCtx.current;
   }
 
-  // ─── TIMER EFFECT — driven by server expiresAt ────────────────────────────
+  // ─── TIMER EFFECT — driven by server createdAt ───────────────────────────
   useEffect(() => {
-    if (!expiresAt || game !== "playing") return;
+    if (!gameStartedAt || game !== "playing") return;
 
-    // Initialise display immediately
-    const init = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+    const expiry = new Date(gameStartedAt).getTime() + TIMER_DURATION * 1000;
+    const init = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
     setTimeLeft(init);
 
     const interval = setInterval(() => {
-      const remaining = Math.max(
-        0,
-        Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000)
-      );
+      const remaining = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
       setTimeLeft(remaining);
 
       if (remaining === 0) {
         clearInterval(interval);
-        // Timer expired — session is dead on the server, no payout
         localStorage.removeItem('activeGameId');
         setGame("expired");
         playBombSound(mutedRef.current ? null : audioCtx.current);
@@ -377,7 +373,7 @@ export default function MineGame() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [expiresAt, game]);
+  }, [gameStartedAt, game]);
 
   const activeMines = game === "idle" ? mines : serverMines;
   const activeGems = game === "idle" ? TOTAL - mines : serverGems;
@@ -412,7 +408,7 @@ export default function MineGame() {
         setServerGems(d.gems);
         setBoard(d.board);
         setRevealed(d.revealed);
-        setExpiresAt(d.expiresAt);
+        setGameStartedAt(d.createdAt);
         setGame('playing');
       })
       .catch(() => localStorage.removeItem('activeGameId'));
@@ -433,7 +429,7 @@ export default function MineGame() {
     if (b <= 0) return toast.error("Enter a valid bet amount.");
     if (b > 40) return toast.error("Maximum bet is 40 credits.");
     if (b > balance) return toast.error("Insufficient balance.");
-    if (mines < 7 || mines > 20) return toast.error("Mines must be between 7 and 20.");
+    if (mines < 5 || mines > 20) return toast.error("Mines must be between 5 and 20.");
 
     setLoading(true);
     try {
@@ -453,7 +449,7 @@ export default function MineGame() {
         setServerGems(d.gems);
         setBoard(d.board);
         setRevealed(d.revealed);
-        setExpiresAt(d.expiresAt);
+        setGameStartedAt(d.createdAt);
         localStorage.setItem('activeGameId', d.gameId);
         setGame("playing");
         // Optimistic credit deduction for instant UI feedback
@@ -567,7 +563,7 @@ export default function MineGame() {
     setGameId(null);
     setServerMult(1);
     setServerPayout(0);
-    setExpiresAt(null);
+    setGameStartedAt(null);
     setTimeLeft(TIMER_DURATION);
     if (user?.credit !== undefined) setBalance(user.credit);
   }
@@ -617,7 +613,7 @@ export default function MineGame() {
           </div>
         ))}
       </div>
-      <input type="range" min={5} max={20} value={mines} disabled={game === "playing"}
+      <input type="range" min={5} max={20} step={1} value={mines} disabled={game === "playing"}
         onChange={e => setMines(+e.target.value)} style={{ width: "100%" }} />
     </div>
   );

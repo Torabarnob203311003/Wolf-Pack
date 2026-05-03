@@ -15,22 +15,13 @@ import {
   Star,
 } from "lucide-react";
 
-const MINE_ALLOWED_EMAILS = [
-  'allendodul6@gmail.com',
-  'zxrcrazy@gmail.com',
-  'franny.c20@googlemail.com',
-  'khendleman@gmail.com',
-  'robkelly3234@icloud.com',
-];
-
-
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, mineEnabled } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
-  const canAccessMine = user && MINE_ALLOWED_EMAILS.includes(user.email);
+  const canAccessMine = !!user && mineEnabled;
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -155,14 +146,14 @@ function Navbar() {
               <div className="flex items-center h-10 gap-2 px-3 py-1.5 bg-gradient-to-r from-yellow-600/20 to-yellow-500/20 border border-yellow-600/30 rounded-full">
                 <Coins className="w-4 h-4 text-yellow-500" />
                 <span className="text-sm font-semibold text-yellow-500">
-                  {user?.credit}
+                  {Number((user?.credit).toFixed(2)) ?? 0}
                 </span>
               </div>
               {/* Reward Points Display */}
               <div className="flex items-center h-10 gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-600/20 to-purple-500/20 border border-purple-600/30 rounded-full">
                 <Star className="w-4 h-4 text-purple-400" />
                 <span className="text-sm font-semibold text-purple-400">
-                  {user?.rewardPoint ?? 0}
+                  {Number((user?.rewardPoint).toFixed(2)) ?? 0}
                 </span>
               </div>
 
@@ -213,13 +204,13 @@ function Navbar() {
                       <div className="flex items-center gap-1.5 px-2 py-1.5 bg-yellow-500/10 border border-yellow-600/20 rounded flex-1">
                         <Coins className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
                         <span className="text-xs font-medium text-yellow-500 truncate">
-                          {user?.credit} cr
+                          {Number(user?.credit.toFixed(2)) || 0} cr
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 px-2 py-1.5 bg-purple-500/10 border border-purple-600/20 rounded flex-1">
                         <Star className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                         <span className="text-xs font-medium text-purple-400 truncate">
-                          {user?.rewardPoint ?? 0} rp
+                          {Number(user?.rewardPoint.toFixed(2)) || 0} rp
                         </span>
                       </div>
                     </div>
@@ -416,13 +407,13 @@ function Navbar() {
                 <div className="flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-600/20 rounded flex-1">
                   <Coins className="w-4 h-4 text-yellow-500 shrink-0" />
                   <span className="text-sm font-medium text-yellow-500">
-                    {user?.credit} cr
+                    {Number(user?.credit.toFixed(2)) || 0} cr
                   </span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-2 bg-purple-500/10 border border-purple-600/20 rounded flex-1">
                   <Star className="w-4 h-4 text-purple-400 shrink-0" />
                   <span className="text-sm font-medium text-purple-400">
-                    {user?.rewardPoint ?? 0} rp
+                    {Number(user?.rewardPoint.toFixed(2)) || 0} rp
                   </span>
                 </div>
               </div>

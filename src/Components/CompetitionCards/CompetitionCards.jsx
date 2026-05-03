@@ -9,13 +9,6 @@ import MineGame from "../MineGame/MineGame";
 
 
 const CARDS_PER_PAGE = 12;
-const ALLOWED_EMAILS = [
-  'allendodul6@gmail.com',
-  'zxrcrazy@gmail.com',
-  'franny.c20@googlemail.com',
-  'khendleman@gmail.com',
-  'robkelly3234@icloud.com',
-];
 
 
 function CompetitionCards() {
@@ -25,9 +18,9 @@ function CompetitionCards() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [segments, setSegments] = useState([]);
-  const { user, refetchUser } = useAuth();
+  const { user, refetchUser, mineEnabled } = useAuth();
 
-  const canAccessMine = user && ALLOWED_EMAILS.includes(user.email);
+  const canAccessMine = !!user && mineEnabled;
 
 
   // Build filter buttons dynamically

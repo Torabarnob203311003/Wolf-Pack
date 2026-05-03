@@ -52,7 +52,7 @@ const Profile = () => {
               <Award className="w-8 h-8 text-yellow-400" />
               <span className="text-gray-400 text-sm font-medium">Rewards</span>
             </div>
-            <p className="text-4xl font-bold text-white mb-1">{user?.rewardPoint || 0}</p>
+            <p className="text-4xl font-bold text-white mb-1">{Number((user?.rewardPoint).toFixed(2)) || 0}</p>
             <p className="text-gray-400 text-sm">Points</p>
           </div>
 
@@ -61,7 +61,7 @@ const Profile = () => {
               <Coins className="w-8 h-8 text-green-400" />
               <span className="text-gray-400 text-sm font-medium">Credits</span>
             </div>
-            <p className="text-4xl font-bold text-white mb-1">{user?.credit || 0}</p>
+            <p className="text-4xl font-bold text-white mb-1">{Number((user?.credit).toFixed(2)) || 0} </p>
             <p className="text-gray-400 text-sm">{user?.currency || 'GBP'}</p>
           </div>
 
@@ -70,7 +70,7 @@ const Profile = () => {
               <CreditCard className="w-8 h-8 text-blue-400" />
               <span className="text-gray-400 text-sm font-medium">Raffles</span>
             </div>
-            <p className="text-4xl font-bold text-white mb-1">{user?.raffles?.length || 0}</p>
+            <p className="text-4xl font-bold text-white mb-1">{Number((user?.raffles?.length).toFixed(2)) || 0}</p>
             <p className="text-gray-400 text-sm">Entries</p>
           </div>
         </div>
