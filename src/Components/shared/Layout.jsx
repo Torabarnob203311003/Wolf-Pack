@@ -16,7 +16,7 @@ function Layout() {
       {!isCardDetails && (
         <>
           <Hero />
-          <FacebookBanner />
+          {/* <FacebookBanner /> */}
         </>
       )}
       <Toaster/>

@@ -61,7 +61,7 @@ function App() {
             <>
               <Navbar />
               <PastWinners />
-              <FacebookBanner />
+              {/* <FacebookBanner /> */}
               {/* <About /> */}
               {/* <TrustpilotSection /> */}
               <Footer />
